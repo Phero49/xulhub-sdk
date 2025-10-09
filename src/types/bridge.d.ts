@@ -255,6 +255,8 @@ export type Config = {
    * @default false
    */
   hasAutoGen?: boolean;
+
+
 };
 /**
  * in this function you can write code that process the user input into a valid cell content data structure your app accept

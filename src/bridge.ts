@@ -202,6 +202,7 @@ class NotebookSDK {
     this.isPublished = data.published;
     this.cellIndex = data.cellIndex;
     this.contentPosition = data.contentPosition;
+    //TODO look into calculated score
     this.score = data.calculatedScore || 0;
     this.contentData = data.cellContentData;
 
@@ -237,6 +238,8 @@ class NotebookSDK {
   private handleScoreUpdate(data: any): void {
     this.score = data.score;
   }
+
+
 
   // ============================================================================
   // Configuration
