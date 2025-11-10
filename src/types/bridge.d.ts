@@ -286,11 +286,13 @@ export type Config = {
  */
 export type ProcessImport = (
   input: string | HTMLElement ,
-) => {
+) => ProcessImportOutPut [] | null;
+
+export type ProcessImportOutPut = {
   cellType: "exercise" | "note";
   cellContent: any;
   text: string | null;
-}[];
+}
 
 export type AutoGenerateCellsOptions = {
   contentType: "htmlElement" | "markdown" | "json"|null

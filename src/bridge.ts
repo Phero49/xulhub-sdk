@@ -111,6 +111,7 @@ class NotebookSDK {
    * Registers core message handlers for SDK operation
    */
   private registerCoreMessageHandlers(): void {
+
     this.messageHandlers["sdkInitialized"] = this.handleInitialization.bind(this);
     this.messageHandlers["scoreUpdated"] = this.handleScoreUpdate.bind(this);
     this.messageHandlers["getConfig"] = this.handleConfigRequest.bind(this);
@@ -191,13 +192,39 @@ class NotebookSDK {
    * Sets up cell state and quiz manager
    */
   private handleInitialization(data: {
-    cellContentData: any;
+    cellContentData: any | null;
     cellIndex: number;
     contentPosition: number;
     calculatedScore?: number;
     published: boolean;
+    getMeta:boolean
   }): void {
-    console.log("SDK initialized with data:", data.cellContentData);
+   
+  if (data.getMeta) {
+    //used  to get the instruction and type and saved to db  and other meta
+let icon = "";
+const iconEl = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+
+if (iconEl) {
+  const href = iconEl.getAttribute("href") || "";
+
+  // Check if href already starts with http or https
+  if (/^https?:\/\//i.test(href)) {
+    icon = href;
+  } else {
+    // Convert relative or protocol-less URL to full
+    icon = new URL(href, window.location.origin).href;
+  }
+}
+
+    this.sendToParent("get-meta-response",{autoGen:{
+      icon:icon,
+      type:this.contentGenerator.contentType,
+      instruction:this.contentGenerator.instructionFormat
+    }})
+    return
+  }
+
     
     this.isPublished = data.published;
     this.cellIndex = data.cellIndex;
@@ -206,8 +233,9 @@ class NotebookSDK {
     this.score = data.calculatedScore || 0;
     this.contentData = data.cellContentData;
 
+    console.log(data.cellContentData,'kkkkkkkkkkkkk')
     // Handle auto-generation if configured
-    if (data.cellContentData.processCells) {
+    if (data.cellContentData) {
       const generatedContent = this.contentGenerator.processImport(
         data.cellContentData.dataToProcess
       );
@@ -268,10 +296,10 @@ class NotebookSDK {
 
   /**
    * Gets the current cell content data
-   * @returns Typed content data
+   * @returns Typed content data or  null if  no data available
    */
-  public getContentData<T>(): T {
-    return this.contentData as T;
+  public getContentData<T>(): T | null {
+    return this.contentData as T  ;
   }
 
   /**
@@ -352,15 +380,16 @@ class NotebookSDK {
   /**
    * Processes an element's HTML to add TTS functionality
    * @param element - HTML element to process
+   * @param size - play button size css units
    * @returns Promise that resolves when processing is complete
    */
-  public processTTS(element: HTMLElement): Promise<void> {
+  public processTTS(element: HTMLElement,size:string): Promise<void> {
     return new Promise<void>((resolve) => {
       this.sendToParent("processTTs", element.innerHTML);
 
       this.messageHandlers["processTTs"] = (processedHTML: string) => {
         element.innerHTML = processedHTML;
-        this.attachTTSControls(element);
+        this.attachTTSControls(element,size);
         resolve();
       };
     });
@@ -370,7 +399,7 @@ class NotebookSDK {
    * Attaches interactive TTS controls to elements with data-tts attribute
    * @param container - Container element to search within
    */
-  private attachTTSControls(container: HTMLElement): HTMLElement {
+  private attachTTSControls(container: HTMLElement,size:string): HTMLElement {
     const ttsElements = container.querySelectorAll("[data-tts]");
     
     ttsElements.forEach((element) => {
@@ -379,7 +408,7 @@ class NotebookSDK {
         return;
       }
 
-      const button = this.createTTSButton(element as HTMLElement);
+      const button = this.createTTSButton(element as HTMLElement,size);
       element.prepend(button);
     });
 
@@ -391,11 +420,11 @@ class NotebookSDK {
    * @param element - Element containing the text to speak
    * @returns Configured button element
    */
-  private createTTSButton(element: HTMLElement): HTMLSpanElement {
+  private createTTSButton(element: HTMLElement,size:string): HTMLSpanElement {
     const button = document.createElement("span");
     this.styleTTSButton(button);
 
-    const icons = this.getTTSIcons();
+    const icons = this.getTTSIcons(size);
     button.innerHTML = icons.play;
 
     let isSpeaking = false;
@@ -449,10 +478,10 @@ class NotebookSDK {
   /**
    * Gets SVG icons for TTS controls
    */
-  private getTTSIcons() {
+  private getTTSIcons(size:string) {
     return {
-      play: '<svg height="24px" viewBox="0 -960 960 960" width="18px" fill="rgba(238, 42, 84, 1)"><path d="m380-300 280-180-280-180v360ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>',
-      stop: '<svg height="20px" viewBox="0 -960 960 960" width="18px" fill="#EA3323"><path d="M336-336h288v-288H336v288ZM480.28-96Q401-96 331-126t-122.5-82.5Q156-261 126-330.96t-30-149.5Q96-560 126-629.5q30-69.5 82.5-122T330.96-834q69.96-30 149.5-30t149.04 30q69.5 30 122 82.5T834-629.28q30 69.73 30 149Q864-401 834-331t-82.5 122.5Q699-156 629.28-126q-69.73 30-149 30Zm-.28-72q130 0 221-91t91-221q0-130-91-221t-221-91q-130 0-221 91t-91 221q0 130 91 221t221 91Zm0-312Z"/></svg>',
+      play: `<svg height="${size}" viewBox="0 -960 960 960" width="${size}" fill="rgba(238, 42, 84, 1)"><path d="m380-300 280-180-280-180v360ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>`,
+      stop: `<svg height="${size}" viewBox="0 -960 960 960" width="${size}" fill="#EA3323"><path d="M336-336h288v-288H336v288ZM480.28-96Q401-96 331-126t-122.5-82.5Q156-261 126-330.96t-30-149.5Q96-560 126-629.5q30-69.5 82.5-122T330.96-834q69.96-30 149.5-30t149.04 30q69.5 30 122 82.5T834-629.28q30 69.73 30 149Q864-401 834-331t-82.5 122.5Q699-156 629.28-126q-69.73 30-149 30Zm-.28-72q130 0 221-91t91-221q0-130-91-221t-221-91q-130 0-221 91t-91 221q0 130 91 221t221 91Zm0-312Z"/></svg>`,
     };
   }
 
@@ -593,6 +622,9 @@ class NotebookSDK {
     this.eventHandlers.error.forEach((callback) => callback(error));
     console.error("[NotebookSDK] Error:", error);
   }
+
+
+
 }
 
 
