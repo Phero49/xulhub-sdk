@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xulhub SDK Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #2c3e50;
+            color: white;
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 2rem 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-header p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .nav-section {
+            padding: 1.5rem 2rem 0;
+        }
+
+        .nav-section h3 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 0.5rem 0;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: white;
+        }
+
+        .nav-link.active {
+            color: #3498db;
+            font-weight: 500;
+        }
+
+        .content {
+            margin-left: 280px;
+            padding: 3rem;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem;
+            border-radius: 12px;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .section h3 {
+            color: #34495e;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 1.5rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .keyword { color: #c678dd; }
+        .string { color: #98c379; }
+        .function { color: #61afef; }
+        .comment { color: #5c6370; font-style: italic; }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .api-method {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+
+        .api-method h4 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .api-signature {
+            background: #e9ecef;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 0.5rem 0;
+        }
+
+        .param-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .param-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .param-list li:last-child {
+            border-bottom: none;
+        }
+
+        .param-name {
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .param-type {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge-blue { background: #e3f2fd; color: #1976d2; }
+        .badge-green { background: #e8f5e9; color: #388e3c; }
+        .badge-orange { background: #fff3e0; color: #f57c00; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h1>Xulhub SDK</h1>
+                <p>Build Custom Cell Content</p>
+            </div>
+            <div class="nav-section">
+                <h3>Getting Started</h3>
+                <a href="#intro" class="nav-link">Introduction</a>
+                <a href="#installation" class="nav-link">Installation</a>
+                <a href="#quickstart" class="nav-link">Quick Start</a>
+            </div>
+            <div class="nav-section">
+                <h3>Core SDK</h3>
+                <a href="#lifecycle" class="nav-link">Lifecycle</a>
+                <a href="#data" class="nav-link">Data Management</a>
+                <a href="#config" class="nav-link">Configuration</a>
+            </div>
+            <div class="nav-section">
+                <h3>Quiz Manager</h3>
+                <a href="#quiz-intro" class="nav-link">Introduction</a>
+                <a href="#verification" class="nav-link">Answer Verification</a>
+                <a href="#ai-verify" class="nav-link">AI Verification</a>
+                <a href="#quiz-ui" class="nav-link">UI Controls</a>
+            </div>
+            <div class="nav-section">
+                <h3>Features</h3>
+                <a href="#tts" class="nav-link">Text-to-Speech</a>
+                <a href="#dialogs" class="nav-link">Dialogs</a>
+                <a href="#autogen" class="nav-link">Auto-Generation</a>
+            </div>
+        </nav>
+
+        <main class="content">
+            <div class="hero">
+                <h1>Xulhub SDK</h1>
+                <p>Create interactive exercises and custom cell content for educational notebooks</p>
+            </div>
+
+            <section id="intro" class="section">
+                <h2>Introduction</h2>
+                <p>The Xulhub SDK enables you to create custom interactive content for educational notebooks. Build quizzes, exercises, visualizations, and more that seamlessly integrate with the Xulhub platform.</p>
+                
+                <h3>Understanding the Notebook Structure</h3>
+                <p>Xulhub notebooks follow a hierarchical structure:</p>
+                
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 6px; margin: 1rem 0;">
+                    <div style="font-family: monospace; line-height: 2;">
+                        📓 <strong>Notebook</strong> (The entire document)<br>
+                        &nbsp;&nbsp;└─ 📄 <strong>Cell</strong> (A section/block in the notebook)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ 🧩 <strong>Cell Content</strong> (The interactive component inside a cell)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #667eea;">← Your extension runs here</span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <strong>🎯 Extension Scope:</strong> Your extensions/plugins operate at the <strong>cell content level</strong>. Each cell can contain one or more pieces of content, and your extension controls what happens inside that content area. The SDK handles communication between your extension and the parent notebook application.
+                </div>
+
+                <h3>How It Works</h3>
+                <ul style="margin: 1rem 0;">
+                    <li><strong>Notebook</strong> - The top-level container that holds all cells and manages overall state</li>
+                    <li><strong>Cells</strong> - Individual blocks within a notebook. Each cell can have text, exercises, or custom content</li>
+                    <li><strong>Cell Content</strong> - Your extension runs here as an isolated component (iframe) within a cell</li>
+                </ul>
+
+                <p>The SDK provides a bridge between your isolated cell content and the parent application, enabling you to:</p>
+                <ul style="margin: 1rem 0;">
+                    <li>Save and load content data specific to your cell content</li>
+                    <li>Access notebook-wide metadata and settings</li>
+                    <li>Control quiz scoring and navigation</li>
+                    <li>Communicate with the parent application for features like TTS and dialogs</li>
+                </ul>
+                
+                <h3>Key Features</h3>
+                <div class="info-box">
+                    <ul>
+                        <li>Quiz and exercise management with scoring</li>
+                        <li>AI-powered answer verification</li>
+                        <li>Text-to-speech support for accessibility</li>
+                        <li>Auto-generation from various content formats</li>
+                        <li>Data persistence and state management</li>
+                        <li>Isolated execution environment for security</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="installation" class="section">
+                <h2>Installation</h2>
+                <p>Install the SDK in your project:</p>
+                <div class="code-block">
+<span class="comment">// Using npm</span>
+npm install @xulhub/sdk
+
+<span class="comment">// Using yarn</span>
+yarn add @xulhub/sdk
+                </div>
+
+                <h3>Basic Import</h3>
+                <div class="code-block">
+<span class="keyword">import</span> { createNotebookSDK } <span class="keyword">from</span> <span class="string">'@xulhub/sdk'</span>;
+
+<span class="keyword">const</span> sdk = <span class="function">createNotebookSDK</span>();
+                </div>
+            </section>
+
+            <section id="quickstart" class="section">
+                <h2>Quick Start</h2>
+                <p>Here's a simple example to get you started:</p>
+                <div class="code-block">
+<span class="keyword">import</span> { createNotebookSDK } <span class="keyword">from</span> <span class="string">'@xulhub/sdk'</span>;
+
+<span class="keyword">const</span> sdk = <span class="function">createNotebookSDK</span>();
+
+<span class="comment">// Wait for SDK to initialize</span>
+sdk.<span class="function">onReady</span>(() => {
+    <span class="comment">// Get existing content data</span>
+    <span class="keyword">const</span> data = sdk.<span class="function">getContentData</span>();
+    
+    <span class="comment">// Set up quiz verification</span>
+    sdk.quizManager.verifyAnswer = () => {
+        <span class="keyword">const</span> isCorrect = <span class="function">checkUserAnswer</span>();
+        <span class="keyword">return</span> {
+            passed: isCorrect,
+            points: isCorrect ? 10 : 0,
+            next: isCorrect
+        };
+    };
+    
+    <span class="comment">// Show verification button when ready</span>
+    sdk.quizManager.<span class="function">showVerificationButton</span>();
+});
+
+<span class="comment">// Handle errors</span>
+sdk.<span class="function">onError</span>((error) => {
+    console.<span class="function">error</span>(<span class="string">'SDK Error:'</span>, error);
+});
+                </div>
+            </section>
+
+            <section id="lifecycle" class="section">
+                <h2>Lifecycle & Initialization</h2>
+                
+                <div class="api-method">
+                    <h4>onReady(callback, config?)</h4>
+                    <p>Registers a callback to execute when the SDK is fully initialized.</p>
+                    <div class="api-signature">
+                        onReady(callback: () => void, config?: Config): void
+                    </div>
+                    <ul class="param-list">
+                        <li><span class="param-name">callback</span> <span class="param-type">Function</span> - Function to execute when ready</li>
+                        <li><span class="param-name">config</span> <span class="param-type">Config (optional)</span> - SDK configuration options</li>
+                    </ul>
+                </div>
+
+                <div class="api-method">
+                    <h4>onError(callback)</h4>
+                    <p>Registers an error handler for SDK errors.</p>
+                    <div class="api-signature">
+                        onError(callback: (error: Error) => void): void
+                    </div>
+                </div>
+
+                <h3>Initialization Properties</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>isInitialized</td>
+                            <td>boolean</td>
+                            <td>Whether SDK has completed initialization</td>
+                        </tr>
+                        <tr>
+                            <td>isPublished</td>
+                            <td>boolean</td>
+                            <td>Whether notebook is in published/read-only mode</td>
+                        </tr>
+                        <tr>
+                            <td>cellIndex</td>
+                            <td>number</td>
+                            <td>Index of current cell in notebook</td>
+                        </tr>
+                        <tr>
+                            <td>contentPosition</td>
+                            <td>number</td>
+                            <td>Position of content within the cell</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="data" class="section">
+                <h2>Data Management</h2>
+
+                <div class="api-method">
+                    <h4>getContentData<T>()</h4>
+                    <p>Retrieves the current cell content data.</p>
+                    <div class="api-signature">
+                        getContentData<T>(): T | null
+                    </div>
+                    <div class="code-block">
+<span class="keyword">interface</span> QuizData {
+    question: <span class="keyword">string</span>;
+    options: <span class="keyword">string</span>[];
+    correctAnswer: <span class="keyword">number</span>;
+}
+
+<span class="keyword">const</span> data = sdk.<span class="function">getContentData</span>&lt;QuizData&gt;();
+console.<span class="function">log</span>(data.question);
+                    </div>
+                </div>
+
+                <div class="api-method">
+                    <h4>saveContent<T>(data)</h4>
+                    <p>Saves content data to the parent application.</p>
+                    <div class="api-signature">
+                        saveContent<T>(data: T): void
+                    </div>
+                    <div class="warning-box">
+                        <strong>Important:</strong> Only call saveContent after SDK is initialized (inside onReady callback).
+                    </div>
+                    <div class="code-block">
+<span class="keyword">const</span> updatedData = {
+    question: <span class="string">"What is 2+2?"</span>,
+    options: [<span class="string">"3"</span>, <span class="string">"4"</span>, <span class="string">"5"</span>],
+    correctAnswer: 1
+};
+
+sdk.<span class="function">saveContent</span>(updatedData);
+                    </div>
+                </div>
+
+                <div class="api-method">
+                    <h4>getNotebookMetadata()</h4>
+                    <p>Fetches metadata about the current notebook.</p>
+                    <div class="api-signature">
+                        getNotebookMetadata(): Promise<NotebookMeta>
+                    </div>
+                    <div class="code-block">
+<span class="keyword">const</span> meta = <span class="keyword">await</span> sdk.<span class="function">getNotebookMetadata</span>();
+console.<span class="function">log</span>(<span class="string">`Notebook: ${meta.title}`</span>);
+console.<span class="function">log</span>(<span class="string">`Created: ${meta.createdAt}`</span>);
+                    </div>
+                </div>
+            </section>
+
+            <section id="config" class="section">
+                <h2>Configuration</h2>
+                <p>Configure SDK behavior using the Config object:</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Type</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>height</td>
+                            <td>string</td>
+                            <td>"auto"</td>
+                            <td>Height of content area (CSS units)</td>
+                        </tr>
+                        <tr>
+                            <td>hideCheckButton</td>
+                            <td>boolean</td>
+                            <td>false</td>
+                            <td>Hide default check button</td>
+                        </tr>
+                        <tr>
+                            <td>hasAutoGen</td>
+                            <td>boolean</td>
+                            <td>false</td>
+                            <td>Enable auto-generation support</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="code-block">
+sdk.<span class="function">onReady</span>(() => {
+    <span class="comment">// Your initialization code</span>
+}, {
+    height: <span class="string">"500px"</span>,
+    hideCheckButton: <span class="keyword">true</span>,
+    hasAutoGen: <span class="keyword">true</span>
+});
+                </div>
+            </section>
+
+            <section id="quiz-intro" class="section">
+                <h2>Quiz Manager</h2>
+                <p>The QuizManager handles all quiz-related functionality including answer verification, scoring, and navigation.</p>
+
+                <div class="info-box">
+                    Access the QuizManager through <code>sdk.quizManager</code> after SDK initialization.
+                </div>
+
+                <h3>Properties</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>totalScore</td>
+                            <td>number</td>
+                            <td>Total accumulated score for this quiz</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="verification" class="section">
+                <h2>Answer Verification</h2>
+
+                <div class="api-method">
+                    <h4>verifyAnswer</h4>
+                    <p>Function that checks if the user's answer is correct. You must implement this function.</p>
+                    <div class="api-signature">
+                        verifyAnswer: () => { passed: boolean; points: number; next: boolean; }
+                    </div>
+                    <div class="code-block">
+<span class="comment">// Implement verification logic</span>
+sdk.quizManager.verifyAnswer = () => {
+    <span class="keyword">const</span> userAnswer = <span class="function">getUserInput</span>();
+    <span class="keyword">const</span> correctAnswer = <span class="string">"Paris"</span>;
+    <span class="keyword">const</span> isCorrect = userAnswer === correctAnswer;
+    
+    <span class="keyword">return</span> {
+        passed: isCorrect,
+        points: isCorrect ? 10 : 0,
+        next: isCorrect <span class="comment">// Allow progression if correct</span>
+    };
+};
+                    </div>
+                </div>
+
+                <div class="api-method">
+                    <h4>submitAnswer(options)</h4>
+                    <p>Notifies parent application that user has answered a question.</p>
+                    <div class="api-signature">
+                        submitAnswer(options: { passed: boolean; points: number; next: boolean; playSound?: boolean; }): void
+                    </div>
+                    <ul class="param-list">
+                        <li><span class="param-name">passed</span> <span class="param-type">boolean</span> - Whether answer was correct</li>
+                        <li><span class="param-name">points</span> <span class="param-type">number</span> - Points awarded</li>
+                        <li><span class="param-name">next</span> <span class="param-type">boolean</span> - Whether user can proceed</li>
+                        <li><span class="param-name">playSound</span> <span class="param-type">boolean (optional)</span> - Play feedback sound</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="ai-verify" class="section">
+                <h2>AI-Powered Verification</h2>
+
+                <div class="api-method">
+                    <h4>verifyWithAi<T>(inputData, prompt, output)</h4>
+                    <p>Verifies user input using AI with a custom prompt and expected output format.</p>
+                    <div class="api-signature">
+                        verifyWithAi<T>(inputData: any, prompt: string, output: T): Promise<T>
+                    </div>
+                    <p>Perfect for open-ended questions, essay grading, code review, or complex answers requiring contextual understanding.</p>
+                </div>
+
+                <h3>Examples</h3>
+
+                <h4>Grade an Essay</h4>
+                <div class="code-block">
+<span class="keyword">const</span> result = <span class="keyword">await</span> sdk.quizManager.<span class="function">verifyWithAi</span>(
+    userEssay,
+    <span class="string">"Grade this essay on clarity, grammar, and argument strength. Provide scores 0-10."</span>,
+    { clarity: 0, grammar: 0, argument: 0, feedback: <span class="string">""</span> }
+);
+
+console.<span class="function">log</span>(<span class="string">`Clarity: ${result.clarity}/10`</span>);
+console.<span class="function">log</span>(<span class="string">`Feedback: ${result.feedback}`</span>);
+                </div>
+
+                <h4>Verify Code Solution</h4>
+                <div class="code-block">
+<span class="keyword">const</span> result = <span class="keyword">await</span> sdk.quizManager.<span class="function">verifyWithAi</span>(
+    userCode,
+    <span class="string">"Check if this code correctly implements bubble sort. Identify bugs if any."</span>,
+    { correct: <span class="keyword">false</span>, bugs: [], suggestions: <span class="string">""</span> }
+);
+
+<span class="keyword">if</span> (!result.correct) {
+    <span class="function">showBugs</span>(result.bugs);
+}
+                </div>
+
+                <h4>Check Mathematical Reasoning</h4>
+                <div class="code-block">
+<span class="keyword">const</span> result = <span class="keyword">await</span> sdk.quizManager.<span class="function">verifyWithAi</span>(
+    userExplanation,
+    <span class="string">"Evaluate if the student correctly explained the Pythagorean theorem."</span>,
+    { 
+        understands_concept: <span class="keyword">false</span>, 
+        score: 0, 
+        missing_points: [] 
+    }
+);
+                </div>
+            </section>
+
+            <section id="quiz-ui" class="section">
+                <h2>Quiz UI Controls</h2>
+
+                <div class="api-method">
+                    <h4>showVerificationButton()</h4>
+                    <p>Shows the answer verification button.</p>
+                    <div class="code-block">
+sdk.quizManager.<span class="function">showVerificationButton</span>();
+                    </div>
+                </div>
+
+                <div class="api-method">
+                    <h4>hideVerificationButton()</h4>
+                    <p>Hides the answer verification button.</p>
+                    <div class="code-block">
+sdk.quizManager.<span class="function">hideVerificationButton</span>();
+                    </div>
+                </div>
+
+                <div class="api-method">
+                    <h4>hideFooter()</h4>
+                    <p>Hides the entire footer. Use when implementing custom check and continue buttons.</p>
+                    <div class="code-block">
+sdk.quizManager.<span class="function">hideFooter</span>();
+                    </div>
+                </div>
+
+                <h3>Navigation</h3>
+
+                <div class="api-method">
+                    <h4>goToNextCell()</h4>
+                    <p>Navigates to the next cell in the notebook.</p>
+                    <div class="code-block">
+sdk.quizManager.<span class="function">goToNextCell</span>();
+                    </div>
+                </div>
+
+                <div class="api-method">
+                    <h4>goToPreviousCell()</h4>
+                    <p>Navigates to the previous cell.</p>
+                    <div class="code-block">
+sdk.quizManager.<span class="function">goToPreviousCell</span>();
+                    </div>
+                </div>
+
+                <h3>Utility Methods</h3>
+
+                <div class="api-method">
+                    <h4>reset()</h4>
+                    <p>Resets the quiz state and clears score.</p>
+                    <div class="code-block">
+sdk.quizManager.<span class="function">reset</span>();
+                    </div>
+                </div>
+
+                <div class="api-method">
+                    <h4>requestHint(hintLevel?)</h4>
+                    <p>Requests hints for the current question.</p>
+                    <div class="api-signature">
+                        requestHint(hintLevel?: number): void
+                    </div>
+                    <div class="code-block">
+<span class="comment">// Request progressive hints</span>
+sdk.quizManager.<span class="function">requestHint</span>(1); <span class="comment">// First hint</span>
+sdk.quizManager.<span class="function">requestHint</span>(2); <span class="comment">// Second hint</span>
+sdk.quizManager.<span class="function">requestHint</span>(3); <span class="comment">// Final hint</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tts" class="section">
+                <h2>Text-to-Speech (TTS)</h2>
+                <p>Add audio accessibility to your content with built-in text-to-speech functionality.</p>
+
+                <h3>TTS Markup Format</h3>
+                <div class="info-box">
+                    <strong>Format:</strong> <code>▶️[lang_code][hide] text to read ⏸️</code>
+                    <ul>
+                        <li><strong>▶️</strong> - TTS start marker</li>
+                        <li><strong>⏸️</strong> - TTS stop marker</li>
+                        <li><strong>[lang_code]</strong> - Language code (e.g., "en", "es", "fr", "ja")</li>
+                        <li><strong>[hide]</strong> - Optional: hides text but still reads it aloud</li>
+                    </ul>
+                </div>
+
+                <div class="api-method">
+                    <h4>processTTS(element, size)</h4>
+                    <p>Converts TTS markup into interactive play/pause buttons.</p>
+                    <div class="api-signature">
+                        processTTS(element: HTMLElement, size: string): Promise<void>
+                    </div>
+                    <div class="code-block">
+<span class="keyword">const</span> container = document.<span class="function">getElementById</span>(<span class="string">'content'</span>);
+<span class="keyword">await</span> sdk.<span class="function">processTTS</span>(container, <span class="string">"24px"</span>);
+                    </div>
+                </div>
+
+                <div class="api-method">
+                    <h4>reverseTTS(innerHTML)</h4>
+                    <p>Converts TTS buttons back to original markup format.</p>
+                    <div class="api-signature">
+                        reverseTTS(innerHTML: string): Promise<string>
+                    </div>
+                    <div class="code-block">
+<span class="keyword">const</span> originalMarkup = <span class="keyword">await</span> sdk.<span class="function">reverseTTS</span>(element.innerHTML);
+                    </div>
+                </div>
+
+                <h3>Example Usage</h3>
+                <div class="code-block">
+<span class="comment">// HTML content with TTS markup</span>
+<span class="keyword">const</span> content = <span class="string">`
+    &lt;p&gt;▶️[en] Hello, welcome to the lesson! ⏸️&lt;/p&gt;
+    &lt;p&gt;▶️[es] Hola, bienvenidos a la lección! ⏸️&lt;/p&gt;
+    &lt;p&gt;▶️[en][hide] This text is hidden but will be read ⏸️&lt;/p&gt;
+`</span>;
+
+document.<span class="function">getElementById</span>(<span class="string">'content'</span>).innerHTML = content;
+
+<span class="comment">// Process TTS markup</span>
+<span class="keyword">await</span> sdk.<span class="function">processTTS</span>(
+    document.<span class="function">getElementById</span>(<span class="string">'content'</span>),
+    <span class="string">"24px"</span>
+);
+                </div>
+            </section>
+
+            <section id="dialogs" class="section">
+                <h2>Dialogs</h2>
+
+                <div class="api-method">
+                    <h4>openDialog(options)</h4>
+                    <p>Opens a dialog in the parent application with flexible configuration.</p>
+                    <div class="api-signature">
+                        openDialog(options: DialogOptions): void
+                    </div>
+                </div>
+
+                <h3>Dialog Options</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>position</td>
+                            <td>string</td>
+                            <td>"standard" | "top" | "right" | "bottom" | "left"</td>
+                        </tr>
+                        <tr>
+                            <td>fullscreen</td>
+                            <td>boolean</td>
+                            <td>Dialog takes up entire screen</td>
+                        </tr>
+                        <tr>
+                            <td>fullwidth</td>
+                            <td>boolean</td>
+                            <td>Dialog stretches to fill viewport width</td>
+                        </tr>
+                        <tr>
+                            <td>maxwidth</td>
+                            <td>boolean</td>
+                            <td>Dialog respects maximum width constraint</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Example Usage</h3>
+                <div class="code-block">
+sdk.<span class="function">openDialog</span>({
+    title: <span class="string">'Results'</span>,
+    message: <span class="string">'You scored 8/10!'</span>,
+    position: <span class="string">'center'</span>,
+    fullwidth: <span class="keyword">true</span>
+});
+                </div>
+            </section>
+
+            <section id="autogen" class="section">
+                <h2>Auto-Generation</h2>
+                <p>Enable your extension to automatically generate cells from imported content like HTML, Markdown, or JSON.</p>
+
+                <div class="warning-box">
+                    <strong>Note:</strong> Set <code>hasAutoGen: true</code> in your config to enable this feature.
+                </div>
+
+                <h3>Content Generator Configuration</h3>
+                <div class="code-block">
+sdk.contentGenerator = {
+    contentType: <span class="string">'htmlElement'</span>, <span class="comment">// 'htmlElement' | 'markdown' | 'json'</span>
+    instructionFormat: <span class="string">'Generate a multiple-choice question with 4 options'</span>,
+    processImport: (input) => {
+        <span class="comment">// Transform input into cell content</span>
+        <span class="keyword">return</span> [{
+            cellType: <span class="string">'exercise'</span>,
+            cellContent: <span class="function">parseQuestion</span>(input),
+            text: <span class="string">'Auto-generated question'</span>
+        }];
+    }
+};
+                </div>
+
+                <h3>ProcessImport Function</h3>
+                <div class="api-method">
+                    <h4>processImport(input)</h4>
+                    <p>Transforms preprocessed content into structured cell data.</p>
+                    <div class="api-signature">
+                        processImport(input: string | HTMLElement): ProcessImportOutput[] | null
+                    </div>
+                </div>
+
+                <h4>Input Types</h4>
+                <ul class="param-list">
+                    <li><span class="param-name">HTML</span> - Host app parses pasted HTML into an HTMLElement</li>
+                    <li><span class="param-name">Markdown</span> - Raw string sent as-is</li>
+                    <li><span class="param-name">JSON</span> - Object sent directly</li>
+                </ul>
+
+                <h4>Output Format</h4>
+                <div class="code-block">
+<span class="keyword">interface</span> ProcessImportOutput {
+    cellType: <span class="string">'exercise'</span> | <span class="string">'note'</span>;
+    cellContent: <span class="keyword">any</span>;      <span class="comment">// Your extension's data format</span>
+    text: <span class="keyword">string</span> | <span class="keyword">null</span>;  <span class="comment">// Initial text/prompt to display</span>
+}
+                </div>
+
+                <h3>Complete Example</h3>
+                <div class="code-block">
+<span class="keyword">const</span> sdk = <span class="function">createNotebookSDK</span>();
+
+sdk.contentGenerator = {
+    contentType: <span class="string">'htmlElement'</span>,
+    instructionFormat: <span class="string">'Create quiz questions from this content'</span>,
+    
+    processImport: (input) => {
+        <span class="keyword">if</span> (input <span class="keyword">instanceof</span> HTMLElement) {
+            <span class="comment">// Extract questions from HTML</span>
+            <span class="keyword">const</span> questions = input.<span class="function">querySelectorAll</span>(<span class="string">'.question'</span>);
+            
+            <span class="keyword">return</span> Array.<span class="function">from</span>(questions).<span class="function">map</span>(q => ({
+                cellType: <span class="string">'exercise'</span>,
+                cellContent: {
+                    question: q.<span class="function">querySelector</span>(<span class="string">'.text'</span>).textContent,
+                    options: Array.<span class="function">from</span>(
+                        q.<span class="function">querySelectorAll</span>(<span class="string">'.option'</span>)
+                    ).<span class="function">map</span>(o => o.textContent),
+                    correctAnswer: <span class="function">parseInt</span>(
+                        q.<span class="function">getAttribute</span>(<span class="string">'data-correct'</span>)
+                    )
+                },
+                text: q.<span class="function">querySelector</span>(<span class="string">'.text'</span>).textContent
+            }));
+        }
+        
+        <span class="keyword">return</span> <span class="keyword">null</span>;
+    }
+};
+
+sdk.<span class="function">onReady</span>(() => {
+    console.<span class="function">log</span>(<span class="string">'Auto-generation enabled'</span>);
+}, {
+    hasAutoGen: <span class="keyword">true</span>
+});
+                </div>
+            </section>
+
+            <section id="advanced" class="section">
+                <h2>Advanced Features</h2>
+
+                <h3>Custom Message Handlers</h3>
+                <p>Register custom message handlers for advanced communication:</p>
+                <div class="code-block">
+sdk.<span class="function">registerMessageHandler</span>(<span class="string">'customEvent'</span>, (data) => {
+    console.<span class="function">log</span>(<span class="string">'Received custom event:'</span>, data);
+    <span class="comment">// Handle custom logic</span>
+});
+                </div>
+
+                <h3>Show Correct Answer</h3>
+                <p>Implement the showCorrectAnswer function to display solutions:</p>
+                <div class="code-block">
+sdk.showCorrectAnswer = () => {
+    <span class="keyword">const</span> data = sdk.<span class="function">getContentData</span>();
+    <span class="keyword">const</span> correctOption = data.options[data.correctAnswer];
+    
+    <span class="comment">// Highlight correct answer in UI</span>
+    document.<span class="function">querySelector</span>(<span class="string">'.correct'</span>).textContent = correctOption;
+    document.<span class="function">querySelector</span>(<span class="string">'.correct'</span>).style.display = <span class="string">'block'</span>;
+};
+                </div>
+
+                <h3>Score Updates</h3>
+                <p>Track score changes automatically:</p>
+                <div class="code-block">
+<span class="comment">// Access current score</span>
+console.<span class="function">log</span>(<span class="string">`Current score: ${sdk.score}`</span>);
+
+<span class="comment">// Update quiz total score</span>
+sdk.quizManager.<span class="function">updateTotalScore</span>(50);
+                </div>
+            </section>
+
+            <section id="examples" class="section">
+                <h2>Complete Examples</h2>
+
+                <h3>Multiple Choice Quiz</h3>
+                <div class="code-block">
+<span class="keyword">import</span> { createNotebookSDK } <span class="keyword">from</span> <span class="string">'@xulhub/sdk'</span>;
+
+<span class="keyword">const</span> sdk = <span class="function">createNotebookSDK</span>();
+
+sdk.<span class="function">onReady</span>(() => {
+    <span class="keyword">const</span> data = sdk.<span class="function">getContentData</span>();
+    
+    <span class="comment">// Render quiz UI</span>
+    <span class="function">renderQuiz</span>(data);
+    
+    <span class="comment">// Setup verification</span>
+    sdk.quizManager.verifyAnswer = () => {
+        <span class="keyword">const</span> selected = document.<span class="function">querySelector</span>(<span class="string">'input[name="answer"]:checked'</span>);
+        <span class="keyword">const</span> isCorrect = selected && 
+            <span class="function">parseInt</span>(selected.value) === data.correctAnswer;
+        
+        <span class="keyword">return</span> {
+            passed: isCorrect,
+            points: isCorrect ? 10 : 0,
+            next: isCorrect
+        };
+    };
+    
+    <span class="comment">// Show verification button</span>
+    sdk.quizManager.<span class="function">showVerificationButton</span>();
+}, {
+    height: <span class="string">'400px'</span>
+});
+
+<span class="keyword">function</span> <span class="function">renderQuiz</span>(data) {
+    <span class="keyword">const</span> container = document.<span class="function">getElementById</span>(<span class="string">'quiz'</span>);
+    container.innerHTML = <span class="string">`
+        &lt;h3&gt;${data.question}&lt;/h3&gt;
+        ${data.options.map((opt, i) => `
+            &lt;label&gt;
+                &lt;input type="radio" name="answer" value="${i}"&gt;
+                ${opt}
+            &lt;/label&gt;
+        `).join('')}
+    `</span>;
+}
+                </div>
+
+                <h3>AI-Verified Essay Question</h3>
+                <div class="code-block">
+<span class="keyword">const</span> sdk = <span class="function">createNotebookSDK</span>();
+
+sdk.<span class="function">onReady</span>(() => {
+    <span class="keyword">const</span> checkButton = document.<span class="function">getElementById</span>(<span class="string">'check'</span>);
+    
+    checkButton.<span class="function">addEventListener</span>(<span class="string">'click'</span>, <span class="keyword">async</span> () => {
+        <span class="keyword">const</span> essay = document.<span class="function">getElementById</span>(<span class="string">'essay'</span>).value;
+        
+        <span class="keyword">try</span> {
+            <span class="keyword">const</span> result = <span class="keyword">await</span> sdk.quizManager.<span class="function">verifyWithAi</span>(
+                essay,
+                <span class="string">`Evaluate this essay about climate change. 
+                 Check for: understanding of concepts, argument quality,
+                 use of evidence, and clarity of writing.`</span>,
+                {
+                    understanding: 0,
+                    argument: 0,
+                    evidence: 0,
+                    clarity: 0,
+                    feedback: <span class="string">""</span>,
+                    totalScore: 0
+                }
+            );
+            
+            <span class="comment">// Display results</span>
+            <span class="function">showFeedback</span>(result);
+            
+            <span class="comment">// Submit answer</span>
+            sdk.quizManager.<span class="function">submitAnswer</span>({
+                passed: result.totalScore >= 70,
+                points: result.totalScore,
+                next: result.totalScore >= 70,
+                playSound: <span class="keyword">true</span>
+            });
+            
+        } <span class="keyword">catch</span> (error) {
+            console.<span class="function">error</span>(<span class="string">'Verification failed:'</span>, error);
+        }
+    });
+}, {
+    hideCheckButton: <span class="keyword">true</span>
+});
+                </div>
+
+                <h3>Interactive Flashcards with TTS</h3>
+                <div class="code-block">
+<span class="keyword">const</span> sdk = <span class="function">createNotebookSDK</span>();
+
+sdk.<span class="function">onReady</span>(<span class="keyword">async</span> () => {
+    <span class="keyword">const</span> data = sdk.<span class="function">getContentData</span>();
+    
+    <span class="comment">// Render flashcards</span>
+    <span class="keyword">const</span> container = document.<span class="function">getElementById</span>(<span class="string">'flashcards'</span>);
+    container.innerHTML = data.cards.<span class="function">map</span>(card => <span class="string">`
+        &lt;div class="card"&gt;
+            &lt;div class="front"&gt;▶️[en] ${card.question} ⏸️&lt;/div&gt;
+            &lt;div class="back hidden"&gt;▶️[en] ${card.answer} ⏸️&lt;/div&gt;
+        &lt;/div&gt;
+    `</span>).<span class="function">join</span>(<span class="string">''</span>);
+    
+    <span class="comment">// Process TTS markup</span>
+    <span class="keyword">await</span> sdk.<span class="function">processTTS</span>(container, <span class="string">"28px"</span>);
+    
+    <span class="comment">// Add flip functionality</span>
+    container.<span class="function">querySelectorAll</span>(<span class="string">'.card'</span>).<span class="function">forEach</span>(card => {
+        card.<span class="function">addEventListener</span>(<span class="string">'click'</span>, () => {
+            card.<span class="function">querySelector</span>(<span class="string">'.back'</span>).classList.<span class="function">toggle</span>(<span class="string">'hidden'</span>);
+        });
+    });
+});
+                </div>
+            </section>
+
+            <section id="best-practices" class="section">
+                <h2>Best Practices</h2>
+
+                <h3>✅ Do's</h3>
+                <ul style="margin: 1rem 0;">
+                    <li><strong>Always wait for onReady</strong> before accessing SDK methods</li>
+                    <li><strong>Handle errors gracefully</strong> with onError callbacks</li>
+                    <li><strong>Type your data</strong> with TypeScript generics for better IDE support</li>
+                    <li><strong>Save content regularly</strong> to prevent data loss</li>
+                    <li><strong>Use AI verification</strong> for complex, open-ended questions</li>
+                    <li><strong>Implement showCorrectAnswer</strong> for better learning experience</li>
+                    <li><strong>Add TTS support</strong> for accessibility</li>
+                </ul>
+
+                <h3>❌ Don'ts</h3>
+                <ul style="margin: 1rem 0;">
+                    <li><strong>Don't call SDK methods</strong> before initialization</li>
+                    <li><strong>Don't save null or undefined data</strong></li>
+                    <li><strong>Don't ignore the published state</strong> (disable editing when published)</li>
+                    <li><strong>Don't make assumptions</strong> about cell position or index</li>
+                    <li><strong>Don't block the UI</strong> during AI verification (show loading states)</li>
+                </ul>
+
+                <h3>Performance Tips</h3>
+                <div class="info-box">
+                    <ul>
+                        <li>Debounce save operations to avoid excessive calls</li>
+                        <li>Cache processed TTS elements when possible</li>
+                        <li>Use efficient DOM manipulation techniques</li>
+                        <li>Clean up event listeners when appropriate</li>
+                        <li>Optimize AI prompts to be concise and clear</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="troubleshooting" class="section">
+                <h2>Troubleshooting</h2>
+
+                <h3>Common Issues</h3>
+
+                <div class="api-method">
+                    <h4>SDK not initializing</h4>
+                    <p><strong>Problem:</strong> SDK times out or doesn't respond</p>
+                    <p><strong>Solution:</strong></p>
+                    <div class="code-block">
+<span class="comment">// Check if running in iframe</span>
+<span class="keyword">if</span> (window.parent === window) {
+    console.<span class="function">error</span>(<span class="string">'SDK must run in an iframe'</span>);
+}
+
+<span class="comment">// Add error handler</span>
+sdk.<span class="function">onError</span>((error) => {
+    console.<span class="function">error</span>(<span class="string">'SDK Error:'</span>, error);
+    <span class="comment">// Show user-friendly message</span>
+});
+                    </div>
+                </div>
+
+                <div class="api-method">
+                    <h4>Data not persisting</h4>
+                    <p><strong>Problem:</strong> Content changes aren't saved</p>
+                    <p><strong>Solution:</strong></p>
+                    <div class="code-block">
+<span class="comment">// Ensure SDK is initialized</span>
+<span class="keyword">if</span> (!sdk.isInitialized) {
+    console.<span class="function">error</span>(<span class="string">'Wait for onReady before saving'</span>);
+    <span class="keyword">return</span>;
+}
+
+<span class="comment">// Validate data before saving</span>
+<span class="keyword">if</span> (data && <span class="keyword">typeof</span> data === <span class="string">'object'</span>) {
+    sdk.<span class="function">saveContent</span>(data);
+}
+                    </div>
+                </div>
+
+                <div class="api-method">
+                    <h4>TTS not working</h4>
+                    <p><strong>Problem:</strong> TTS buttons don't appear or don't speak</p>
+                    <p><strong>Solution:</strong></p>
+                    <div class="code-block">
+<span class="comment">// Ensure proper markup format</span>
+<span class="keyword">const</span> text = <span class="string">'▶️[en] Hello world ⏸️'</span>; <span class="comment">// Correct</span>
+<span class="keyword">const</span> wrong = <span class="string">'▶️ Hello world ⏸️'</span>;     <span class="comment">// Missing [lang]</span>
+
+<span class="comment">// Wait for processing to complete</span>
+<span class="keyword">await</span> sdk.<span class="function">processTTS</span>(element, <span class="string">"24px"</span>);
+console.<span class="function">log</span>(<span class="string">'TTS processing complete'</span>);
+                    </div>
+                </div>
+
+                <h3>Debugging Tips</h3>
+                <div class="code-block">
+<span class="comment">// Log SDK state</span>
+console.<span class="function">log</span>(<span class="string">'SDK initialized:'</span>, sdk.isInitialized);
+console.<span class="function">log</span>(<span class="string">'Published mode:'</span>, sdk.isPublished);
+console.<span class="function">log</span>(<span class="string">'Cell index:'</span>, sdk.cellIndex);
+console.<span class="function">log</span>(<span class="string">'Current score:'</span>, sdk.score);
+
+<span class="comment">// Monitor messages</span>
+window.<span class="function">addEventListener</span>(<span class="string">'message'</span>, (e) => {
+    console.<span class="function">log</span>(<span class="string">'Received message:'</span>, e.data);
+});
+                </div>
+            </section>
+
+            <section id="api-reference" class="section">
+                <h2>API Reference</h2>
+                <p>Complete API reference for all SDK methods and properties.</p>
+
+                <h3>SDK Properties</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>score</td>
+                            <td>number</td>
+                            <td>Current calculated score</td>
+                        </tr>
+                        <tr>
+                            <td>isInitialized</td>
+                            <td>boolean</td>
+                            <td>SDK initialization status</td>
+                        </tr>
+                        <tr>
+                            <td>isPublished</td>
+                            <td>boolean</td>
+                            <td>Published/read-only mode</td>
+                        </tr>
+                        <tr>
+                            <td>cellIndex</td>
+                            <td>number</td>
+                            <td>Current cell index</td>
+                        </tr>
+                        <tr>
+                            <td>contentPosition</td>
+                            <td>number</td>
+                            <td>Content position in cell</td>
+                        </tr>
+                        <tr>
+                            <td>quizManager</td>
+                            <td>QuizManager</td>
+                            <td>Quiz management instance</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>QuizManager Properties</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>totalScore</td>
+                            <td>number</td>
+                            <td>Total accumulated score</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <footer style="margin-top: 4rem; padding: 2rem; text-align: center; color: #6c757d; border-top: 1px solid #dee2e6;">
+                <p>Xulhub SDK Documentation • Version 1.0</p>
+                <p style="margin-top: 0.5rem;">Need help? Contact support or visit our GitHub repository</p>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const targetSection = document.getElementById(targetId);
+                
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Update active link
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Highlight active section on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${id}`) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.section').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>

@@ -8,6 +8,7 @@ import { QuizManager } from "./quizMananger";
 import type {
   AutoGenerateCellsOptions,
   Config,
+  connectPayload,
 } from "./types/bridge";
 import { checkCell, sendMessageToClient } from "./utils/utils";
 
@@ -67,15 +68,19 @@ class NotebookSDK {
   // Initialization
   // ============================================================================
   
-  constructor(config?: Config) {
+  constructor(config: Config) {
+
+    this.config = config
     this.initializeSDK(config);
   }
+ 
 
   /**
    * Initializes the SDK by setting up message listeners and notifying the parent
    * Validates environment and establishes communication channel
    */
-  private initializeSDK(config?:Config): void {
+  private initializeSDK(config?:Config,tries=10): void {
+
     // Validate browser environment
     if (typeof window === "undefined") {
       this.triggerError(new Error("SDK must run in a browser environment"));
@@ -93,13 +98,17 @@ class NotebookSDK {
     // Setup message handling
     window.addEventListener("message", this.handleIncomingMessage.bind(this));
     this.registerCoreMessageHandlers();
-
     // Notify parent that SDK is ready for initialization
-    this.sendToParent('sdkReady',config)
+   // this.sendToParent('sdkReady',config)
 
     // Set timeout for initialization response
     setTimeout(() => {
-      if (!this.isInitialized) {
+      if (!this.isInitialized ) {
+        if (tries >= 0) {
+        //  console.log('attempt to connect ',11-tries)
+        //  return this.initializeSDK({...config,tryagain:true,sessionID:this.sessionID},tries-1)
+
+        }
         this.triggerError(
           new Error("Host application did not respond to SDK initialization")
         );
@@ -107,12 +116,17 @@ class NotebookSDK {
     }, 3000);
   }
 
+  private connect (data:connectPayload) {
+this.handleInitialization(data)
+this.sendToParent("connected",this.config)
+
+  }
   /**
    * Registers core message handlers for SDK operation
    */
   private registerCoreMessageHandlers(): void {
-
-    this.messageHandlers["sdkInitialized"] = this.handleInitialization.bind(this);
+this.messageHandlers['connect'] = this.connect.bind(this)
+   // this.messageHandlers["sdkInitialized"] = this.handleInitialization.bind(this);
     this.messageHandlers["scoreUpdated"] = this.handleScoreUpdate.bind(this);
     this.messageHandlers["getConfig"] = this.handleConfigRequest.bind(this);
     this.messageHandlers["showCorrectAnswer"] = this.handleShowCorrectAnswer.bind(this);
@@ -191,14 +205,8 @@ class NotebookSDK {
    * Handles the initialization data from parent application
    * Sets up cell state and quiz manager
    */
-  private handleInitialization(data: {
-    cellContentData: any | null;
-    cellIndex: number;
-    contentPosition: number;
-    calculatedScore?: number;
-    published: boolean;
-    getMeta:boolean
-  }): void {
+  private handleInitialization(data:connectPayload ): void {
+
    
   if (data.getMeta) {
     //used  to get the instruction and type and saved to db  and other meta
@@ -228,18 +236,27 @@ if (iconEl) {
     
     this.isPublished = data.published;
     this.cellIndex = data.cellIndex;
-    this.contentPosition = data.contentPosition;
+    this.contentData = data.cellContentData;
+    this.contentPosition = data.contentPosition; 
     //TODO look into calculated score
     this.score = data.calculatedScore || 0;
-    this.contentData = data.cellContentData;
+        this.isInitialized = true;
 
-    console.log(data.cellContentData,'kkkkkkkkkkkkk')
-    // Handle auto-generation if configured
-    if (data.cellContentData) {
+    if (data.cellContentData != null && data.cellContentData.processCells) {
+      let rawData = data.cellContentData.dataToProcess
+     if (this.contentGenerator  && this.contentGenerator.contentType?.includes('html')) {
+        const div = document.createElement('div')
+        div.innerHTML =  data.cellContentData.dataToProcess
+     rawData = div
+      }
       const generatedContent = this.contentGenerator.processImport(
-        data.cellContentData.dataToProcess
+       rawData
       );
 
+
+
+    // Handle auto-generation if configured
+ 
       this.sendToParent("autoGenerateCells", generatedContent);
       return
     }
@@ -252,7 +269,7 @@ if (iconEl) {
       this.registerMessageHandler
     );
 
-    this.isInitialized = true;
+  delete  this.messageHandlers['sdkInitialized']
     this.notifyReady();
   }
 
@@ -306,20 +323,39 @@ if (iconEl) {
    * Saves content data to parent application
    * @param data - Content data to save
    */
-  public saveContent<T>(data: T): void {
-    if (!this.isInitialized) {
-      throw new Error(
-        "SDK not initialized. Wait for onReady() event before saving data."
-      );
-    }
-
-    if (data === undefined || data === null) {
-      throw new Error("Cannot save null or undefined data");
-    }
-
-    this.contentData = data;
-    this.sendToParent("saveData", data);
+public saveContent<T>(data: T): void {
+  if (!this.isInitialized) {
+    throw new Error("SDK not initialized. Wait for onReady() before saving.");
   }
+
+  if (data == null) {
+    throw new Error("Cannot save null or undefined data");
+  }
+
+  const type = typeof data;
+
+  // allow only string, array, or plain object
+  if (type !== "string" && type !== "object") {
+    throw new Error("Data must be a string, array, or plain object");
+  }
+
+  // JSON-safe deep clone
+  let cloned: any;
+
+  if (type === "string") {
+    cloned = data; // no cloning needed for strings
+  } else {
+    // must be array or object, not a proxy
+    try {
+      cloned = JSON.parse(JSON.stringify(data));
+    } catch {
+      throw new Error("Data contains non-JSON-safe values");
+    }
+  }
+
+  this.contentData = cloned;
+  this.sendToParent("saveData", cloned);
+}
 
   /**
    * Content generator configuration for auto-generating cells
@@ -585,19 +621,10 @@ if (iconEl) {
    * @param callback - Function to execute when ready
    * @param config - Optional configuration to send to parent
    */
-  public onReady(callback: () => void, config?: Config): void {
+  public onReady(callback: () => void): void {
     this.eventHandlers.ready.push(callback);
 
-    if (this.isInitialized) {
-      // Send configuration to parent
-      this.sendToParent("config", config ?? {
-        hideCheckButton: false,
-        hasAutoGen: false,
-      });
-      
-      // Execute callback asynchronously
-      setTimeout(() => callback(), 0);
-    }
+ 
   }
 
   /**
@@ -646,6 +673,6 @@ if (iconEl) {
  * customSDK.onReady(() => { /* ... *\/ });
  * ```
  */
-export const createNotebookSDK = (config?:Config): NotebookSDK => {
+export const createNotebookSDK = (config:Config): NotebookSDK => {
   return new NotebookSDK(config);
 };

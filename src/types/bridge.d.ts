@@ -256,13 +256,14 @@ export type Config = {
    */
   hasAutoGen?: boolean;
 
+  tryagain?:boolean;
+  sessionID?:string
 
 };
 /**
  * in this function you can write code that process the user input into a valid cell content data structure your app accept
  * @param input the input entered by the user
  */
-
 /**
  * Converts preprocessed user input into a structured cell that your extension can display.
  *
@@ -278,24 +279,60 @@ export type Config = {
  * @param input - The preprocessed content provided by the host app. Can be:
  *   - `string` (Markdown)
  *   - `HTMLElement` (HTML content)
- *   - `Record<string, any>` (JSON data)
- * @returns An object describing the generated cell:
+ * @returns An array of objects describing the generated cell(s), or `null` if no cell was created:
  *   - `cellType`: `'exercise' | 'note'` – indicates the type of the cell.
  *   - `cellContent`: structured content accepted by your extension.
  *   - `text`: optional initial text (e.g., a question or prompt) to display in the new cell.
  */
 export type ProcessImport = (
-  input: string | HTMLElement ,
-) => ProcessImportOutPut [] | null;
+  input: string | HTMLElement
+) => ProcessImportOutPut[] | null;
 
+/**
+ * Represents the output of processing an imported cell.
+ */
 export type ProcessImportOutPut = {
+  /** The type of cell, either an exercise or a note */
   cellType: "exercise" | "note";
-  cellContent: any;
-  text: string | null;
-}
 
+  /** The structured content of the cell */
+  cellContent: any;
+
+  /** Optional initial text for the cell */
+  text: string | null;
+};
+
+/**
+ * Options for automatically generating cells.
+ */
 export type AutoGenerateCellsOptions = {
-  contentType: "htmlElement" | "markdown" | "json"|null
-  instructionFormat: string |null;
+  /**
+   * The type of content being passed for processing.
+   * - `"htmlElement"`: content is an HTML element
+   * - `"markdown"`: content is a markdown string
+   * - `"json"`: content is a JSON object
+   * - `null`: unspecified or unknown content type
+   */
+  contentType: "htmlElement" | "markdown" | "json" | null;
+
+  /**
+   * The instruction prompt to guide the cell generation process. 
+   * For example, a template or task description for generating exercises.
+   */
+  instructionFormat: string | null;
+
+  /** Function to process imported content into a `ProcessImportOutPut` */
   processImport: ProcessImport;
 };
+
+interface connectPayload {
+    cellContentData: any | null;
+    cellIndex: number;
+    contentPosition: number;
+    calculatedScore?: number;
+    published: boolean;
+    getMeta:boolean;
+   
+    
+
+  }
