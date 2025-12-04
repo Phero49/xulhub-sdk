@@ -26,7 +26,7 @@ export class QuizManager {
   
   /** Event registration function from parent SDK */
   private registerEvent: NotebookSDK['_registerEvent'];
-
+  private sendToParent :(event: string, payload?: any) => void 
   // ============================================================================
   // Initialization
   // ============================================================================
@@ -35,14 +35,15 @@ export class QuizManager {
     handleError: (err: any) => void,
     cellIndex: number,
     contentPosition: number,
-    registerEvent: NotebookSDK['_registerEvent']
+    registerEvent: NotebookSDK['_registerEvent'],
+    sendToParent:(event: string, payload?: any) => void
   ) {
     this.handleError = handleError;
     this.cellIndex = cellIndex;
     this.contentPosition = contentPosition;
     this.registerEvent = registerEvent;
-
-    console.log(`QuizManager initialized for cell ${cellIndex}, position ${contentPosition}`);
+    this.sendToParent =sendToParent
+  this.registerEvent('tryAgain',this.onTryAgain)
     
     this.setupEventHandlers();
   }
@@ -122,17 +123,19 @@ export class QuizManager {
     );
   }
 
-  /**
-   * Notifies parent application that user has answered a question
-   * Triggers visual/audio feedback and score updates
-   * 
-   * @param options - Answer result details
-   * @param options.passed - Whether the answer was correct
-   * @param options.points - Points awarded for this answer
-   * @param options.next - Whether user can proceed to next question
-   * @param options.playSound - Whether to play feedback sound (default: false)
-   */
-  public submitAnswer({
+/**
+ * Called when a user submits an answer.
+ * Notifies the parent app about the result, updates accumulative points, 
+ * optionally plays a sound, and allows the parent to save the result.
+ *
+ * @param options - Details of the answer result
+ * @param options.passed - Whether the answer matches the expected result
+ * @param options.points - Points awarded for this answer (added to accumulative score)
+ * @param options.next - Whether the user can proceed to the next question
+ * @param options.playSound - Whether to play feedback sound (default: false)
+ */
+
+  public submitAnswerResults({
     passed,
     points,
     next,
@@ -152,6 +155,29 @@ export class QuizManager {
     });
   }
 
+/**
+ * Notifies the parent application that the exercise has been completed.
+ * 
+ * This method should be called when the user has finished all required
+ * interactions with the exercise and no further actions are needed.
+ * 
+ * @example
+ * // When user completes a quiz
+ * sdk.completed();
+ * 
+ * @example
+ * // When conversation reaches the end
+ * if (currentStep >= totalSteps) {
+ *   sdk.completed();
+ * }
+ * 
+ * @fires completed - Sends a "completed" event to the parent application
+ *                   to indicate the exercise is finished.
+ */
+public completed() {
+  this.sendToParent("completed");
+}
+
   // ============================================================================
   // Score Management
   // ============================================================================
@@ -162,9 +188,47 @@ export class QuizManager {
    */
   public updateTotalScore(score: number): void {
     this.totalScore = score;
+    this.sendToParent('registerExerciseTotalScore',score)
   }
 
 
+   /**
+ * Registers a callback that runs when the user requests to retry the exercise.
+ * 
+ * This method allows the exercise to handle "try again" or "reset" actions
+ * initiated by the user or parent application. The callback should reset the
+ * exercise to its initial state and clear any previous user inputs or progress.
+ * 
+ * @example
+ * // Basic usage - reset exercise state
+ * sdk.onTryAgain(() => {
+ *   userAnswers = [];
+ *   currentStep = 0;
+ *   resetUI();
+ * });
+ * 
+ * @example
+ * // Chat exercise - reset conversation
+ * sdk.onTryAgain(() => {
+ *   emptyChat.messages = [];
+ *   guide.value = '';
+ *   botWrite(); // Restart the conversation
+ * });
+ * 
+ * @example
+ * // Quiz exercise - reset answers and UI
+ * sdk.onTryAgain(() => {
+ *   selectedAnswers.clear();
+ *   resetQuizUI();
+ *   showQuestion(0);
+ * });
+ * 
+ * @param callback - Function to execute when try again is triggered.
+ *                   This should reset the exercise to its initial state.
+ */
+  public onTryAgain (callback:()=>void){
+callback()
+  }
 
   // ============================================================================
   // AI-Powered Verification

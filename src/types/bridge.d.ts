@@ -220,8 +220,6 @@ export interface NotebookSDK {
    * });
    */
 
-
-
   /**
    *
    * called if user clicks show answer
@@ -249,6 +247,11 @@ export type Config = {
    * @default false
    */
   hideCheckButton?: boolean;
+  /**
+   * Hide the footer. Use this when implementing a custom check button within the cell content
+   * @default false
+   */
+  hideFooter?: boolean;
 
   /**
    * Enable auto-generation support. Set to true if your extension supports importing and implements `autoGenerateCells`
@@ -256,9 +259,8 @@ export type Config = {
    */
   hasAutoGen?: boolean;
 
-  tryagain?:boolean;
-  sessionID?:string
-
+  tryagain?: boolean;
+  sessionID?: string;
 };
 /**
  * in this function you can write code that process the user input into a valid cell content data structure your app accept
@@ -316,7 +318,7 @@ export type AutoGenerateCellsOptions = {
   contentType: "htmlElement" | "markdown" | "json" | null;
 
   /**
-   * The instruction prompt to guide the cell generation process. 
+   * The instruction prompt to guide the cell generation process.
    * For example, a template or task description for generating exercises.
    */
   instructionFormat: string | null;
@@ -326,13 +328,10 @@ export type AutoGenerateCellsOptions = {
 };
 
 interface connectPayload {
-    cellContentData: any | null;
-    cellIndex: number;
-    contentPosition: number;
-    calculatedScore?: number;
-    published: boolean;
-    getMeta:boolean;
-   
-    
-
-  }
+  cellContentData: any | null;
+  cellIndex: number;
+  contentPosition: number;
+  calculatedScore?: number;
+  published: boolean;
+  getMeta: boolean;
+}

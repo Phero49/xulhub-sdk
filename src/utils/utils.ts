@@ -21,3 +21,16 @@ export const checkCell = (
 ) => {
   return cIndex === cellNumber && contentPosition === cPosition;
 };
+
+import { toBlob } from "html-to-image";
+export async function takeScreenShot(): Promise<ArrayBuffer | null> {
+  const body = document.body;
+  const blob = await toBlob(body, {
+    type: "image/png",
+    pixelRatio: 2,
+    width: body.offsetWidth,
+    backgroundColor: "#121212",
+  });
+  if (blob) return blob.arrayBuffer();
+  return null;
+}

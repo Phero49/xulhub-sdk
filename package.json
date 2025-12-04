@@ -1,10 +1,11 @@
 {
-  "version":"0.1.51" ,
+  "version": "0.1.54",
   "name": "xulhub-sdk",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
+    "vitepress": "^2.0.0-alpha.15",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
@@ -12,6 +13,12 @@
   },
   "scripts": {
     "run": "bun index.ts",
-    "dev": "bun --hot index.ts"
+    "dev": "bun --hot index.ts",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "dependencies": {
+    "html-to-image": "^1.11.13"
   }
 }
