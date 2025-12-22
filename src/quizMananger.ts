@@ -154,6 +154,38 @@ export class QuizManager {
       },
     });
   }
+  /**
+   * Notify the parent context that an incorrect answer occurred so it can play the "incorrect" sound.
+   *
+   * Sends a message using `sendToParent` with two pieces of information:
+   * - event: `"playSound"` — the event name the parent listens for to trigger feedback sounds.
+   * - payload: `{ correct: true }` — an object whose `correct` property is `false` to indicate an incorrect response.
+   *
+   * @remarks
+   * The parent or host is expected to handle the `"playSound"` event and play the appropriate audio when `payload.correct === false`.
+   *
+   * @returns void
+   */
+  public playCorrectSound(){
+this.sendToParent("playSound",{correct:true})
+  }
+
+  /**
+   * Notify the parent context that an incorrect answer occurred so it can play the "incorrect" sound.
+   *
+   * Sends a message using `sendToParent` with two pieces of information:
+   * - event: `"playSound"` — the event name the parent listens for to trigger feedback sounds.
+   * - payload: `{ correct: false }` — an object whose `correct` property is `false` to indicate an incorrect response.
+   *
+   * @remarks
+   * The parent or host is expected to handle the `"playSound"` event and play the appropriate audio when `payload.correct === false`.
+   *
+   * @returns void
+   */
+  public playIncorrectSound(){
+    this.sendToParent("playSound",{correct:false})
+
+  }
 
 /**
  * Notifies the parent application that the exercise has been completed.
