@@ -1,11 +1,5 @@
-import type {
-  Cell,
-  NotebookMeta,
-  ReferenceObject,
-  Source as Resource,
-} from "../../types";
-import { QuizManager } from "../quizMananger";
-import { checkCell, sendMessageToClient } from "../utils/utils";
+import { QuizManager } from "./src/quizMananger";
+import { checkCell, sendMessageToClient } from "./src/utils/utils";
 
 /**
  * Notebook SDK Interface for extending the application functionality
@@ -56,19 +50,6 @@ export interface NotebookSDK {
   cellIndex: number;
   cellContentPosition: number;
   quizManager: QuizManager;
-
-  /**
-   * Retrieves metadata about the current notebook
-   *
-   * @returns Promise resolving to NotebookMeta object
-   *
-   * @example
-   * ```typescript
-   * const meta = await notebookSDK.getNotebookMeta();
-   * console.log(`Notebook: ${meta.title}, Created: ${meta.createdAt}`);
-   * ```
-   */
-  getNotebookMeta(): Promise<NotebookMeta>;
 
   /**
    * Retrieves the data of the **current cell content**.
@@ -258,9 +239,27 @@ export type Config = {
    * @default false
    */
   hasAutoGen?: boolean;
-
+  /**
+   * Enable full width. Set to true if  want your extension to take the available width in  published mode
+   * @default false
+   */
+  fullWidth?: boolean;
+  /**
+   * Enable try again. Set to true if  want your extension to have a try again button
+   * @default false
+   */
   tryagain?: boolean;
+  /**
+   * Session ID for the current session
+   */
   sessionID?: string;
+
+  /**
+   * Type of application exercise or none-exercise exercise types have check button and try again button
+   * while none exercise have continue button
+   * @default "exercise"
+   */
+  applicationType?: "exercise " | "none-exercise";
 };
 /**
  * in this function you can write code that process the user input into a valid cell content data structure your app accept
@@ -287,7 +286,7 @@ export type Config = {
  *   - `text`: optional initial text (e.g., a question or prompt) to display in the new cell.
  */
 export type ProcessImport = (
-  input: string | HTMLElement
+  input: string | HTMLElement,
 ) => ProcessImportOutPut[] | null;
 
 /**

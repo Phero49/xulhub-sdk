@@ -1,346 +1,336 @@
-// Define content types for the notebook
-export type CellBlockContentType =
-  | 'text'
-  | 'chart'
-  | 'table'
-  | 'draw'
-  | 'images'
-  | 'youTube'
-  | 'multiple choice options'
-  | 'shortAnswer'
-  | 'match pair'
-  | 'word builder';
+import { QuizManager } from "./src/quizMananger";
+import { checkCell, sendMessageToClient } from "./src/utils/utils";
 
-// Define content types for multiple choice blocks, excluding 'multiple choice options'
-export type MultipleChoiceBlockContentType = Exclude<
-  CellBlockContentType,
-  'multiple choice options'
->;
+/**
+ * Notebook SDK Interface for extending the application functionality
+ *
+ * @remarks
+ * This SDK provides extensions with access to notebook data, metadata, and persistence capabilities.
+ * All extensions run in a sandboxed iframe environment and communicate with the host via postMessage.
+ *
+ * @example
+ * ```typescript
+ * // Basic usage
+ * notebookSDK.onReady(async () => {
+ *   const cells = await notebookSDK.getNotebookCells();
+ *   const meta = await notebookSDK.getNotebookMeta();
+ *   // Process and save data
+ *   notebookSDK.save(processedData);
+ * });
+ * ```
+ *
+ * @public
+ */
+export interface NotebookSDK {
+  /**
+   * The total score this exercise provides
+   *
+   * @remarks
+   * The score calculation depends on the exercise type:
+   * - Multiple choice: 1 point per correct answer
+   * - Matching: Sum of all possible correct matches
+   * - Custom: Extension-defined scoring logic
+   *
+   * @example
+   * ```typescript
+   * const currentScore = notebookSDK.calculatedScore;
+   * ```
+   */
+  calculatedScore: number;
 
-// Interface for notebook chart data
-export interface NotebookChartData {
-  type: string;
-  dataset: ChartDataset[];
-  xTitle: string;
-  yTitle: string;
-}
+  /**
+   * Indicates whether the SDK is ready to communicate with the host application
+   *
+   * @remarks
+   * Use `onReady()` callback instead of polling this property directly
+   */
+  isReady: boolean;
 
-// Interface for chart dataset
-export interface ChartDataset {
-  title: string;
-  backgroundColor?: string;
-  borderColor?: string;
-  color?: string;
-  borderWidth?: number;
-  x: string[] | number[];
-  y: string[] | number[];
-}
-
-// Type for table data
-export type TableData = {
-  title: string;
-  tableData: {
-    values: (number | string)[][];
-    style?: {
-      color?: string;
-      background?: string;
-      bold?: string;
-      padding?: number;
-    };
-  };
-};
-
-// Supported chart types
-export type SupportedCharts = 'bar' | 'pie' | 'line';
-
-export interface MatchingPair {
-  contentType: 'match pair';
-  data: {
-    [key: number]: {
-      type: 'text' | 'image';
-      data: string;
-      id?: string;
-      tag?: any;
-    }[];
-  };
-}
-export interface SequenceExercise {
-  contentType: 'sequenceExercise';
-  data: [
-    {
-      type: 'image' | 'text';
-      data: string;
-    }
-  ];
-}
-
-export interface WordBuilder {
-  contentType: 'word builder';
-  data: {
-    splitText: string[];
-    splitBy: string;
-  };
-}
-// Interface for content props
-export interface ContentProps {
-  cellNumber: number;
-  source?: string;
-  answerNumber?: number;
-  answerContentPosition?: number;
-  contentPosition: number;
-  type?: string;
-  contents?: any;
-}
-
-// Type for position
-export type Position = {
-  x: number;
-  y: number;
-};
-
-// Interface for box
-interface Box {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  top: number;
-  right: number;
-  bottom: number;
-  left: number;
-}
-
-// Type for size
-type Size = { width: number; height: number };
-
-// Type for image object
-export type ImageObject = {
-  src: string;
-  scale: number;
-  caption: string;
-};
-
-// Interface for notebook metadata
-export interface NotebookMeta {
-  userId: string;
-  version: number;
-  createdOn: Date;
-  notebookId: string;
-  category: string;
-  name: string;
   published: boolean;
-  description: string | null;
-  tags: string | string[];
-  userName: string;
-}
+  cellIndex: number;
+  cellContentPosition: number;
+  quizManager: QuizManager;
 
-// Type for vote notebook cell response
-export type VoteNotebookCellResponse = {
-  notebook_id: number;
-  cell_number: number;
-  vote_difference: number;
-  user_vote: boolean;
-  user_voted: boolean;
-  comment_count: number;
-};
+  /**
+   * Retrieves the data of the **current cell content**.
+   *
+   * @typeParam T - The expected data type of the cell content.
+   * @returns Promise resolving to the data of type T.
+   *
+   * @example
+   * // For a text cell content
+   * const textData = await notebookSDK.getCellContentData<{ text: string }>();
+   * console.log(textData.text); // "Handle event listeners"
+   *
+   * // For a chart cell content
+   * interface ChartData {
+   *   values: number[];
+   *   labels: string[];
+   * }
+   * const chartData = await notebookSDK.getCellContentData<ChartData>();
+   */
+  getCellContentData<T>(): T;
+  /**
+   * Saves your updated cell content.
+   *
+   * Pass the same kind of data you received in `cellContentData`.
+   * The host will persist it automatically.
+   *
+   * @param data - Your updated cell content (must be serializable)
+   *
+   * @example
+   * sdk.save({ chartType: 'line', values: [1, 2, 3] });
+   */
+  save<T>(data: T): void;
 
-// Interface for cell block contents
+  /**
+   * Registers a callback for when the SDK is ready
+   *
+   * @param callback - Function to execute when SDK is initialized
+   * @param config
+   *
+   * @remarks
+   * The callback will be executed immediately if the SDK is already ready.
+   * This is the preferred way to ensure the SDK is initialized before use.
+   *
+   * @example
+   * ```typescript
+   * notebookSDK.onReady(() => {
+   *   // Safe to call SDK methods here
+   *   const cells = await notebookSDK.getNotebookCells();
+   * });
+   * ```
+   */
+  onReady(callback: () => void, config?: Config): void;
 
-// Interfaces for different content types
-interface TextData {
-  contentType: 'text';
-  data: {
-    text: string;
+  /**
+   * Registers a callback for SDK errors
+   *
+   * @param callback - Function to execute when errors occur
+   *
+   * @example
+   * ```typescript
+   * notebookSDK.onError((error) => {
+   *   console.error('SDK Error:', error.message);
+   *   showErrorToUser(error);
+   * });
+   * ```
+   */
+  onError(callback: (error: Error) => void): void;
+
+  /**
+   * Converts inline TTS markup into interactive play/pause buttons.
+   *
+   * Markup format:
+   *   ▶️[lang_code][hide] text to read ⏸️
+   *
+   * - ▶️ indicates the starting point of TTS.
+   * - ⏸️ marks the stopping point.
+   * - [lang_code] specifies the language for TTS (e.g. "en", "ja").
+   * - [hide] is optional: if present, the text between ▶️ and ⏸️ will not be visible to users,
+   *   but will still be read aloud by the TTS engine.
+   *
+   * Example:
+   *   "▶️[en][hide] Hello world ⏸️"
+   *   → Produces a button that triggers TTS in English, with hidden text.
+   *
+   * @param el - HTML element containing annotated TTS markup.
+   * @returns Updated HTML string with markup replaced by interactive buttons.
+   */
+  processTTs(el: HTMLElement): Promise<void>;
+
+  /**
+   * Reverts interactive TTS buttons back into their original inline markup format.
+   *
+   * Example:
+   *   Button-generated HTML → "▶️[en][hide] Hello world ⏸️"
+   *
+   * @param innerHTML - HTML string containing TTS buttons.
+   * @returns HTML string restored to original annotated TTS markup.
+   */
+  reverseTTS(innerHTML: string): Promise<string>;
+  /**
+   * Opens a dialog with flexible configuration.
+   *
+   * Supported properties:
+   * - position?: string — where the dialog should appear (e.g. 'top', 'bottom', 'left', 'right', 'center')
+   * - fullscreen?: boolean — if true, dialog takes up the entire screen
+   * - fullwidth?: boolean — if true, dialog stretches to fill the viewport width
+   * - maxwidth?: boolean — if true, dialog respects a maximum width constraint
+   * - Any other dialog-related properties supported by the host environment
+   *
+   * Example:
+   *   openDialog({
+   *     title: 'Hello',
+   *     message: 'World',
+   *     position: 'bottom',
+   *     fullscreen: false,
+   *     fullwidth: true,
+   *     maxwidth: true
+   *   })
+   *
+   * @param options - Configuration object containing dialog options.
+   * @returns void
+   */
+  openDialog(options: {
+    position?: "standard" | "top" | "right" | "bottom" | "left";
+    fullscreen?: boolean;
+    fullwidth?: boolean;
+    maxwidth?: boolean;
+  }): void;
+
+  _registerEvent: (event: string, callback: (data: any) => any) => void;
+
+  get position(): {
+    cellIndex: number;
+    contentPosition: number;
   };
+
+  /**
+   * Generates example content for a cell and processes it using `processImport`.
+   *
+   * @param options.contentType - 'htmlElement' | 'markdown' | 'json' – format of generated content
+   * @param options.instructionFormat - Plain-text instruction or prompt to generate content
+   * @param options.processImport - Function that converts generated content into a structured cell
+   *
+   * @example
+   * autoGenerate({
+   *   contentType: 'htmlElement',
+   *   instructionFormat: 'Generate a multiple-choice question about photosynthesis with 4 options',
+   *   processImport
+   * });
+   */
+
+  /**
+   *
+   * called if user clicks show answer
+   */
+  showCorrectAnswer: () => void;
 }
 
-interface YoutubeVideoContent {
-  contentType: 'youTube';
-  data: { url: string };
-}
+/**
+ * Configuration options for the component
+ *
+ * @property `height` - The height of the content area. Use CSS values like "100px", "50%", or "auto"
+ * @property `hideCheckButton` - Whether to hide the default check button. Set to `true` if implementing a custom check button within the cell content
+ *@property `hasAutoGen` - Whether the extension supports auto-generated cells. Set to `true` if your extension supports importing and implements `autoGenerateCells`
+ * @property `background` - Optional background color to override the default  background. Use CSS color values
+ */
+export type Config = {
+  /**
+   * Height of the content area. Accepts CSS values like "100px", "50%", or "auto"
+   * @default "auto"
+   */
+  height?: string;
 
-interface TableContent {
-  contentType: 'table';
-  data: TableData;
-}
+  /**
+   * Hide the default check button. Use this when implementing a custom check button within the cell content
+   * @default false
+   */
+  hideCheckButton?: boolean;
+  /**
+   * Hide the footer. Use this when implementing a custom check button within the cell content
+   * @default false
+   */
+  hideFooter?: boolean;
 
-interface ImageData {
-  contentType: 'images';
-  data: ImageObject[];
-}
+  /**
+   * Enable auto-generation support. Set to true if your extension supports importing and implements `autoGenerateCells`
+   * @default false
+   */
+  hasAutoGen?: boolean;
+  /**
+   * Enable full width. Set to true if  want your extension to take the available width in  published mode
+   * @default false
+   */
+  fullWidth?: boolean;
+  /**
+   * Enable try again. Set to true if  want your extension to have a try again button
+   * @default false
+   */
+  tryagain?: boolean;
+  /**
+   * Session ID for the current session
+   */
+  sessionID?: string;
 
-interface NotebookChart {
-  contentType: 'chart';
-  data: NotebookChartData;
-}
+  /**
+   * Type of application exercise or none-exercise exercise types have check button and try again button
+   * while none exercise have continue button
+   * @default "exercise"
+   */
+  applicationType?: "exercise " | "none-exercise";
+};
+/**
+ * in this function you can write code that process the user input into a valid cell content data structure your app accept
+ * @param input the input entered by the user
+ */
+/**
+ * Converts preprocessed user input into a structured cell that your extension can display.
+ *
+ * `ProcessImport` is called by the SDK after the host app has prepared the content:
+ *  - **HTML content**: Host app parses the pasted input into an `HTMLElement` and sends its `innerHTML`.
+ *    The SDK reconstructs it into a `Document` before passing it to this function.
+ *  - **Markdown content**: Host app sends the raw string as-is.
+ *  - **JSON content**: Host app sends the object directly.
+ *
+ * Your implementation should transform the received input into a format your extension understands
+ * (for example, an exercise cell, note, or any custom interactive content).
+ *
+ * @param input - The preprocessed content provided by the host app. Can be:
+ *   - `string` (Markdown)
+ *   - `HTMLElement` (HTML content)
+ * @returns An array of objects describing the generated cell(s), or `null` if no cell was created:
+ *   - `cellType`: `'exercise' | 'note'` – indicates the type of the cell.
+ *   - `cellContent`: structured content accepted by your extension.
+ *   - `text`: optional initial text (e.g., a question or prompt) to display in the new cell.
+ */
+export type ProcessImport = (
+  input: string | HTMLElement,
+) => ProcessImportOutPut[] | null;
 
-export interface Draw {
-  contentType: 'draw';
-  data: any;
-}
-export interface ShortAnswerMath {
-  contentType: 'math';
-  data: {
-    latex: string;
-  };
-}
-// Interface for multiple choice contents
-export interface MultipleChoiceContents {
-  label: string;
-  optionContent: MultipleChoiceBlockContents[];
-}
+/**
+ * Represents the output of processing an imported cell.
+ */
+export type ProcessImportOutPut = {
+  /** The type of cell, either an exercise or a note */
+  cellType: "exercise" | "note";
 
-export type shortAnswerContentData =
-  | TextData
-  | TableContent
-  | NotebookChart
-  | ShortAnswerMath;
+  /** The structured content of the cell */
+  cellContent: any;
 
-export type CorrectShortAnswers = {
-  [key: number]: {
-    loc: number[];
-    data: shortAnswerContentData[];
-  };
+  /** Optional initial text for the cell */
+  text: string | null;
 };
 
-export interface ShortAnswer {
-  contentType: 'shortAnswer';
-  data: shortAnswerContentData[];
-}
-// Interface for multiple choice options
-interface MultipleChoiceOptions {
-  contentType: 'multiple choice options';
-  data: MultipleChoiceContents[];
-  correctAnswer?: string;
-}
+/**
+ * Options for automatically generating cells.
+ */
+export type AutoGenerateCellsOptions = {
+  /**
+   * The type of content being passed for processing.
+   * - `"htmlElement"`: content is an HTML element
+   * - `"markdown"`: content is a markdown string
+   * - `"json"`: content is a JSON object
+   * - `null`: unspecified or unknown content type
+   */
+  contentType: "htmlElement" | "markdown" | "json" | null;
 
-interface AnnotationExercise {
-  contentType: 'AnnotationExercise';
-  data: {
-    originalText: string;
-    annotatedText: string;
-  };
-}
-// Union type for all cell contents
-export type CellBlockContents =
-  | TextData
-  | TableContent
-  | ImageData
-  | MultipleChoiceOptions
-  | YoutubeVideoContent
-  | NotebookChart
-  | Draw
-  | ShortAnswer
-  | MatchingPair
-  | AnnotationExercise
-  | WordBuilder;
+  /**
+   * The instruction prompt to guide the cell generation process.
+   * For example, a template or task description for generating exercises.
+   */
+  instructionFormat: string | null;
 
-// Type for multiple block choice contents (excluding MultipleChoiceOptions)
-export type MultipleChoiceBlockContents = Exclude<
-  CellBlockContents | ShortAnswer,
-  MultipleChoiceOptions
->;
-
-// Interface for a cell
-export interface Cell {
-  cellType: 'notes' | 'question';
-  label: string;
-  refs?: string[];
-  group?: string;
-  contents: CellBlockContents[];
-}
-
-
-export type cellMode = 'draft' | 'comment' | 'published';
-
-export type sourceType = 'pdfUrl' | 'url' | 'pdf' | 'offline';
-export type OfflineSource = {
-  type: 'offline';
-  item: {
-    title: string;
-    url: string;
-  };
-};
-export type ReferenceObject = {
-  type: 'pdf' | 'markdown' | 'image' | 'url' | 'videoUrl';
-  title: string;
-  content: string | string[];
-  referenceItem?: string;
-  path?: string;
-  id?: number | string;
-};
-export type Reference = {
-  [title: string]: ReferenceObject;
-};
-type Source =
-  | {
-      type: 'pdfUrl' | 'url';
-      item: string;
-    }
-  | OfflineSource
-  | {
-      type: 'pdf';
-      item: { id: string; cover: string; title: string; url?: string };
-    };
-
-// Main interface for a question or note
-export interface OutputEntry {
-  type: 'question' | 'note';
-  questionNumber: string | null; // Question number or null for notes
-  correctAnswer?: string | null; // Included for questions, null if not applicable
-  body: BodyElement[]; // Array of text, diagram, table, or chart elements
-  multipleChoiceOptions?: MultipleChoiceOption[]; // Optional for questions
-  expectedWrittenAnswers: null | BodyElement[]; // Optional for questions
-}
-
-// Types for the body elements
-export type BodyElement =
-  | { text: string } // Descriptive or instructional text
-  | { diagram: string } // Diagram placeholder
-  | {
-      table: {
-        title: string;
-        data: string[][];
-      };
-    } // Tabular data in a 2D array
-  | { chart: SimpleChart }; // Chart details
-
-// Chart details
-export interface SimpleChart {
-  title: string;
-  type: string; // Type of chart (e.g., 'bar', 'line')
-  x: string[]; // X-axis values
-  y: number[] | string[]; // Y-axis values
-  xtitle: string;
-  ytitle: string;
-}
-
-// Multiple-choice option structure
-interface MultipleChoiceOption {
-  option: 'A' | 'B' | 'C' | 'D'; // Choice label
-  body: BodyElement[]; // Reference to the body structure
-}
-export type Options = {
-  question: string;
-  options: string[];
-  correctAnswer: string;
-  explanation?: string | null;
+  /** Function to process imported content into a `ProcessImportOutPut` */
+  processImport: ProcessImport;
 };
 
-export type AnswerSheet = {
-  options: string[];
-  multipleChoice: boolean[];
-  multipleChoiceData: (Options | null)[];
-  openEnd: Cell[];
-  pages: Record<number | string, number | string>;
-  pageLinking: {
-    [key: string | number]: {
-      type: 'page' | 'question';
-      page: string;
-      question: string;
-    };
-  };
-  score?: Record<number | string, number | string>;
-};
-
-
+interface connectPayload {
+  cellContentData: any | null;
+  cellIndex: number;
+  contentPosition: number;
+  calculatedScore?: number;
+  published: boolean;
+  getMeta: boolean;
+}

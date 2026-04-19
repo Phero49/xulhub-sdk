@@ -1,17 +1,23 @@
 {
-  "version": "0.1.55",
+  "version": "0.1.585",
   "name": "xulhub-sdk",
-  "module": "index.ts",
+  "main": "./build/index.js",
+  "module": "./build/index.js",
+  "types": "./build/index.d.ts",
   "type": "module",
+  "files": [
+    "build"
+  ],
   "devDependencies": {
     "@types/bun": "latest",
     "vitepress": "^2.0.0-alpha.15",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^5 || ^6.0.0"
   },
   "scripts": {
+    "build": "bun build --target bun index.ts --outdir=build && tsc && cp types.d.ts build/",
     "run": "bun index.ts",
     "dev": "bun --hot index.ts",
     "docs:dev": "vitepress dev docs",

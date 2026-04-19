@@ -1,9 +1,9 @@
-import type { NotebookSDK } from "./types/bridge";
+import type { NotebookSDK } from "../types";
 import { sendMessageToClient } from "./utils/utils";
 
 /**
  * QuizManager - Manages quiz/exercise functionality within notebook cells
- * 
+ *
  * Handles answer verification, scoring, navigation between cells,
  * and communication with the parent application for quiz-related events.
  */
@@ -11,22 +11,22 @@ export class QuizManager {
   // ============================================================================
   // Properties
   // ============================================================================
-  
+
   /** Total accumulated score for this quiz content */
   public totalScore = 0;
-  
+
   /** Index of the cell containing this quiz */
   private cellIndex: number = -1;
-  
+
   /** Position of this content within the cell */
   private contentPosition: number = -1;
-  
+
   /** Error handler function from parent SDK */
   private handleError: (err: any) => void;
-  
+
   /** Event registration function from parent SDK */
-  private registerEvent: NotebookSDK['_registerEvent'];
-  private sendToParent :(event: string, payload?: any) => void 
+  private registerEvent: NotebookSDK["_registerEvent"];
+  private sendToParent: (event: string, payload?: any) => void;
   // ============================================================================
   // Initialization
   // ============================================================================
@@ -35,16 +35,16 @@ export class QuizManager {
     handleError: (err: any) => void,
     cellIndex: number,
     contentPosition: number,
-    registerEvent: NotebookSDK['_registerEvent'],
-    sendToParent:(event: string, payload?: any) => void
+    registerEvent: NotebookSDK["_registerEvent"],
+    sendToParent: (event: string, payload?: any) => void,
   ) {
     this.handleError = handleError;
     this.cellIndex = cellIndex;
     this.contentPosition = contentPosition;
     this.registerEvent = registerEvent;
-    this.sendToParent =sendToParent
-  this.registerEvent('tryAgain',this.onTryAgain)
-    
+    this.sendToParent = sendToParent;
+    this.registerEvent("tryAgain", this.onTryAgain);
+
     this.setupEventHandlers();
   }
 
@@ -79,10 +79,10 @@ export class QuizManager {
   /**
    * Verification function that must be implemented by the quiz content.
    * This should contain the logic to check if the user's answer is correct.
-   * 
+   *
    * @returns Object containing verification results
    * @throws Error if not implemented before use
-   * 
+   *
    * @example
    * quizManager.verifyAnswer = () => {
    *   const userAnswer = getUserInput();
@@ -98,6 +98,8 @@ export class QuizManager {
     passed: boolean;
     points: number;
     next: boolean;
+    userAnswer?: string;
+    correctAnswer?: string;
   } = () => {
     throw new Error("verifyAnswer must be implemented before use");
   };
@@ -119,27 +121,27 @@ export class QuizManager {
           cellIndex: this.cellIndex,
         },
       },
-      "*"
+      "*",
     );
   }
 
-/**
- * Called when a user submits an answer.
- * Notifies the parent app about the result, updates accumulative points, 
- * optionally plays a sound, and allows the parent to save the result.
- *
- * @param options - Details of the answer result
- * @param options.passed - Whether the answer matches the expected result
- * @param options.points - Points awarded for this answer (added to accumulative score)
- * @param options.next - Whether the user can proceed to the next question
- * @param options.playSound - Whether to play feedback sound (default: false)
- */
+  /**
+   * Called when a user submits an answer.
+   * Notifies the parent app about the result, updates accumulative points,
+   * optionally plays a sound, and allows the parent to save the result.
+   *
+   * @param options - Details of the answer result
+   * @param options.passed - Whether the answer matches the expected result
+   * @param options.points - Points awarded for this answer (added to accumulative score)
+   * @param options.next - Whether the user can proceed to the next question
+   * @param options.playSound - Whether to play feedback sound (default: false)
+   */
 
   public submitAnswerResults({
     passed,
     points,
     next,
-    playSound = false,
+    playSound = true,
   }: {
     passed: boolean;
     points: number;
@@ -166,8 +168,8 @@ export class QuizManager {
    *
    * @returns void
    */
-  public playCorrectSound(){
-this.sendToParent("playSound",{correct:true})
+  public playCorrectSound() {
+    this.sendToParent("playSound", { correct: true });
   }
 
   /**
@@ -182,33 +184,32 @@ this.sendToParent("playSound",{correct:true})
    *
    * @returns void
    */
-  public playIncorrectSound(){
-    this.sendToParent("playSound",{correct:false})
-
+  public playIncorrectSound() {
+    this.sendToParent("playSound", { correct: false });
   }
 
-/**
- * Notifies the parent application that the exercise has been completed.
- * 
- * This method should be called when the user has finished all required
- * interactions with the exercise and no further actions are needed.
- * 
- * @example
- * // When user completes a quiz
- * sdk.completed();
- * 
- * @example
- * // When conversation reaches the end
- * if (currentStep >= totalSteps) {
- *   sdk.completed();
- * }
- * 
- * @fires completed - Sends a "completed" event to the parent application
- *                   to indicate the exercise is finished.
- */
-public completed() {
-  this.sendToParent("completed");
-}
+  /**
+   * Notifies the parent application that the exercise has been completed.
+   *
+   * This method should be called when the user has finished all required
+   * interactions with the exercise and no further actions are needed.
+   *
+   * @example
+   * // When user completes a quiz
+   * sdk.completed();
+   *
+   * @example
+   * // When conversation reaches the end
+   * if (currentStep >= totalSteps) {
+   *   sdk.completed();
+   * }
+   *
+   * @fires completed - Sends a "completed" event to the parent application
+   *                   to indicate the exercise is finished.
+   */
+  public completed() {
+    this.sendToParent("completed");
+  }
 
   // ============================================================================
   // Score Management
@@ -220,46 +221,45 @@ public completed() {
    */
   public updateTotalScore(score: number): void {
     this.totalScore = score;
-    this.sendToParent('registerExerciseTotalScore',score)
+    this.sendToParent("registerExerciseTotalScore", score);
   }
 
-
-   /**
- * Registers a callback that runs when the user requests to retry the exercise.
- * 
- * This method allows the exercise to handle "try again" or "reset" actions
- * initiated by the user or parent application. The callback should reset the
- * exercise to its initial state and clear any previous user inputs or progress.
- * 
- * @example
- * // Basic usage - reset exercise state
- * sdk.onTryAgain(() => {
- *   userAnswers = [];
- *   currentStep = 0;
- *   resetUI();
- * });
- * 
- * @example
- * // Chat exercise - reset conversation
- * sdk.onTryAgain(() => {
- *   emptyChat.messages = [];
- *   guide.value = '';
- *   botWrite(); // Restart the conversation
- * });
- * 
- * @example
- * // Quiz exercise - reset answers and UI
- * sdk.onTryAgain(() => {
- *   selectedAnswers.clear();
- *   resetQuizUI();
- *   showQuestion(0);
- * });
- * 
- * @param callback - Function to execute when try again is triggered.
- *                   This should reset the exercise to its initial state.
- */
-  public onTryAgain (callback:()=>void){
-callback()
+  /**
+   * Registers a callback that runs when the user requests to retry the exercise.
+   *
+   * This method allows the exercise to handle "try again" or "reset" actions
+   * initiated by the user or parent application. The callback should reset the
+   * exercise to its initial state and clear any previous user inputs or progress.
+   *
+   * @example
+   * // Basic usage - reset exercise state
+   * sdk.onTryAgain(() => {
+   *   userAnswers = [];
+   *   currentStep = 0;
+   *   resetUI();
+   * });
+   *
+   * @example
+   * // Chat exercise - reset conversation
+   * sdk.onTryAgain(() => {
+   *   emptyChat.messages = [];
+   *   guide.value = '';
+   *   botWrite(); // Restart the conversation
+   * });
+   *
+   * @example
+   * // Quiz exercise - reset answers and UI
+   * sdk.onTryAgain(() => {
+   *   selectedAnswers.clear();
+   *   resetQuizUI();
+   *   showQuestion(0);
+   * });
+   *
+   * @param callback - Function to execute when try again is triggered.
+   *                   This should reset the exercise to its initial state.
+   */
+  public onTryAgain(callback: () => void) {
+    callback();
   }
 
   // ============================================================================
@@ -268,18 +268,18 @@ callback()
 
   /**
    * Verifies user input using AI with a custom prompt and expected output format
-   * 
+   *
    * Sends the user's input to the parent application's AI service for evaluation.
    * Useful for open-ended questions, essay grading, code review, or complex answers
    * that require contextual understanding beyond simple pattern matching.
-   * 
+   *
    * @template T - The expected response type from AI verification
    * @param inputData - The user's answer/input to be verified (can be text, code, etc.)
    * @param prompt - Instructions for the AI on how to evaluate the input
    * @param output - Example/schema of expected AI response format
    * @returns Promise resolving to AI verification results in the specified format
    * @throws Error if AI verification fails or times out
-   * 
+   *
    * @example
    * // Grade an essay
    * const result = await quizManager.verifyWithAi(
@@ -287,7 +287,7 @@ callback()
    *   "Grade this essay on clarity, grammar, and argument strength. Provide scores 0-10.",
    *   { clarity: 0, grammar: 0, argument: 0, feedback: "" }
    * );
-   * 
+   *
    * @example
    * // Verify code solution
    * const result = await quizManager.verifyWithAi(
@@ -295,7 +295,7 @@ callback()
    *   "Check if this code correctly implements bubble sort. Identify bugs if any.",
    *   { correct: false, bugs: [], suggestions: "" }
    * );
-   * 
+   *
    * @example
    * // Check mathematical reasoning
    * const result = await quizManager.verifyWithAi(
@@ -304,7 +304,11 @@ callback()
    *   { understands_concept: false, score: 0, missing_points: [] }
    * );
    */
-  public verifyWithAi<T>(inputData: any, prompt: string, output: T): Promise<T> {
+  public verifyWithAi<T>(
+    inputData: any,
+    prompt: string,
+    output: T,
+  ): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       // Register error handler first
       this.registerEvent("verifyWithAiError", (errorData) => {
@@ -330,7 +334,6 @@ callback()
       });
     });
   }
-
 
   // ============================================================================
   // UI Control
@@ -362,11 +365,10 @@ callback()
         payload: null,
       },
     });
+  }
 
-  } 
-  
-    /**
-   * Requests parent to hide footer 
+  /**
+   * Requests parent to hide footer
    * Used if you want implement your own check answer and continue button
    */
   public hideFooter(): void {
@@ -410,7 +412,6 @@ callback()
       },
     });
   }
-
 
   // ============================================================================
   // Utility Methods

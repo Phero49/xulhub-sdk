@@ -1,10 +1,9 @@
-import type { NotebookMeta } from "../types";
 import { QuizManager } from "./quizMananger";
 import type {
   AutoGenerateCellsOptions,
   Config,
   connectPayload,
-} from "./types/bridge";
+} from "../types";
 import { checkCell, sendMessageToClient, takeScreenShot } from "./utils/utils";
 
 /**
@@ -83,7 +82,7 @@ class NotebookSDK {
     // Validate iframe context
     if (typeof parent === "undefined") {
       this.triggerError(
-        new Error("SDK must run in an iframe within the host application")
+        new Error("SDK must run in an iframe within the host application"),
       );
       return;
     }
@@ -98,11 +97,12 @@ class NotebookSDK {
     setTimeout(() => {
       if (!this.isInitialized) {
         if (tries >= 0) {
+          console.log("not initialized ", tries);
           this.reconnect();
-          //  return this.initializeSDK({...config,tryagain:true,sessionID:this.sessionID},tries-1)
+          return this.initializeSDK(this.config, tries - 1);
         }
         this.triggerError(
-          new Error("Host application did not respond to SDK initialization")
+          new Error("Host application did not respond to SDK initialization"),
         );
       }
     }, 3000);
@@ -133,7 +133,7 @@ class NotebookSDK {
     // this.messageHandlers["sdkInitialized"] = this.handleInitialization.bind(this);
     this.messageHandlers["scoreUpdated"] = this.handleScoreUpdate.bind(this);
     this.messageHandlers["getConfig"] = this.handleConfigRequest.bind(this);
-    this.messageHandlers["captureScreenshot"] =  this.takeScreenShot.bind(this)
+    this.messageHandlers["captureScreenshot"] = this.takeScreenShot.bind(this);
     this.messageHandlers["showCorrectAnswer"] =
       this.handleShowCorrectAnswer.bind(this);
     this.messageHandlers["error"] = (data) => {
@@ -154,16 +154,18 @@ class NotebookSDK {
     // if (event.origin !== EXPECTED_ORIGIN) return;
 
     const { data } = event;
+    if (data == undefined || data.data == undefined) {
+      return;
+    }
     const { cellIndex: messageCell, contentPosition: messagePosition } =
       data.data;
-
     // Verify message is intended for this cell instance
     if (this.isInitialized) {
       const isTargetCell = checkCell(
         messageCell,
         messagePosition,
         this.cellIndex,
-        this.contentPosition
+        this.contentPosition,
       );
 
       if (!isTargetCell) {
@@ -199,7 +201,7 @@ class NotebookSDK {
    */
   public registerMessageHandler = (
     event: string,
-    callback: (data: any) => any | void
+    callback: (data: any) => any | void,
   ) => {
     this.messageHandlers[event] = callback.bind(this);
   };
@@ -221,7 +223,7 @@ class NotebookSDK {
       //used  to get the instruction and type and saved to db  and other meta
       let icon = "";
       const iconEl = document.querySelector(
-        'link[rel="icon"]'
+        'link[rel="icon"]',
       ) as HTMLLinkElement | null;
 
       if (iconEl) {
@@ -243,7 +245,7 @@ class NotebookSDK {
           instruction: this.contentGenerator.instructionFormat,
         },
       });
-      return;
+      data.published = false;
     }
 
     this.isPublished = data.published;
@@ -278,7 +280,7 @@ class NotebookSDK {
       this.cellIndex,
       this.contentPosition,
       this.registerMessageHandler,
-      this.sendToParent
+      this.sendToParent,
     );
 
     delete this.messageHandlers["sdkInitialized"];
@@ -380,7 +382,7 @@ class NotebookSDK {
    */
   public async uploadFile(
     file: File | Blob | string,
-    timeoutMs: number = 15000
+    timeoutMs: number = 15000,
   ): Promise<string> {
     const allowedTypes = [
       "image/png",
@@ -440,7 +442,7 @@ class NotebookSDK {
 
     const processFile = async (
       f: File | Blob,
-      name?: string
+      name?: string,
     ): Promise<string> => {
       if (!allowedTypes.includes(f.type))
         throw new Error(`File type ${f.type} not supported`);
@@ -448,7 +450,7 @@ class NotebookSDK {
       const arrayBuffer = await f.arrayBuffer();
       if (arrayBuffer.byteLength > 3.5 * 1024 * 1024)
         throw new Error(
-          "File too large (max 3.5 MB). Please resize for better performance."
+          "File too large (max 3.5 MB). Please resize for better performance.",
         );
 
       return sendToHost({
@@ -462,7 +464,7 @@ class NotebookSDK {
       const arrayBuffer = base64ToArrayBuffer(file);
       if (arrayBuffer.byteLength > 3.5 * 1024 * 1024)
         throw new Error(
-          "Base64 file too large (max 3.5 MB). Please resize for better performance."
+          "Base64 file too large (max 3.5 MB). Please resize for better performance.",
         );
 
       const mimeMatch = file.match(/^data:(.+);base64,/);
@@ -479,7 +481,6 @@ class NotebookSDK {
       return processFile(file);
     }
   }
-
 
   /**
    * Optional asynchronous callback invoked before capturing a screenshot.
@@ -507,21 +508,19 @@ class NotebookSDK {
    *
    * @defaultValue null
    */
-  public onCaptureScreenshot = null as null | (()=>Promise<void>)
-/**
- * a call back called when the screen shot has been captured 
- * @defaultValue  null
- */
-  public onScreenshotCaptured = null  as null | (()=>void)
+  public onCaptureScreenshot = null as null | (() => Promise<void>);
+  /**
+   * a call back called when the screen shot has been captured
+   * @defaultValue  null
+   */
+  public onScreenshotCaptured = null as null | (() => void);
   private async takeScreenShot() {
     if (this.onCaptureScreenshot) {
-       await this.onCaptureScreenshot()
+      await this.onCaptureScreenshot();
     }
     const image = await takeScreenShot();
     this.sendToParent("screenshotCaptured", image);
-    if(this.onScreenshotCaptured)[
-      this.onScreenshotCaptured()
-    ]
+    if (this.onScreenshotCaptured) [this.onScreenshotCaptured()];
   }
 
   /**
@@ -533,7 +532,7 @@ class NotebookSDK {
     processImport: (_input) => {
       this.sendToParent(
         "notImplemented",
-        "Content import processing not implemented"
+        "Content import processing not implemented",
       );
       throw new Error("Content import processing not implemented");
     },
@@ -550,7 +549,7 @@ class NotebookSDK {
   public showCorrectAnswer = (): void => {
     this.sendToParent(
       "notImplemented",
-      "Show correct answer not implemented for this cell type"
+      "Show correct answer not implemented for this cell type",
     );
     throw new Error("Show correct answer not implemented");
   };
@@ -693,7 +692,7 @@ class NotebookSDK {
    */
   private createSpeechUtterance(
     text: string,
-    languageCode: string
+    languageCode: string,
   ): SpeechSynthesisUtterance {
     const utterance = new SpeechSynthesisUtterance(text);
     const voices = speechSynthesis.getVoices();
@@ -702,7 +701,7 @@ class NotebookSDK {
     const voice =
       voices.find((v) => v.lang.toLowerCase() === languageCode.toLowerCase()) ||
       voices.find((v) =>
-        v.lang.toLowerCase().startsWith(languageCode.toLowerCase())
+        v.lang.toLowerCase().startsWith(languageCode.toLowerCase()),
       );
 
     if (voice) {
@@ -730,6 +729,13 @@ class NotebookSDK {
     this.sendToParent("openDialog", options);
   }
 
+  /**
+   * close a dialog in the parent application
+   */
+  public closeDialog(): void {
+    this.sendToParent("closeDialog");
+  }
+
   // ============================================================================
   // Data Fetching
   // ============================================================================
@@ -742,7 +748,7 @@ class NotebookSDK {
   private async requestDataFromParent<T>(eventName: string): Promise<T> {
     if (!this.isInitialized) {
       throw new Error(
-        "SDK not initialized. Wait for onReady() event before requesting data."
+        "SDK not initialized. Wait for onReady() event before requesting data.",
       );
     }
 
@@ -766,7 +772,7 @@ class NotebookSDK {
       setTimeout(() => {
         window.removeEventListener("message", handler);
         reject(
-          new Error(`Timeout: No response for ${eventName} after 10 seconds`)
+          new Error(`Timeout: No response for ${eventName} after 10 seconds`),
         );
       }, 10000);
     });
@@ -775,9 +781,9 @@ class NotebookSDK {
   /**
    * Fetches notebook metadata from parent application
    */
-  public getNotebookMetadata(): Promise<NotebookMeta> {
-    return this.requestDataFromParent("getMeta");
-  }
+  // public getNotebookMetadata(): Promise<NotebookMeta> {
+  //   return this.requestDataFromParent("getMeta");
+  // }
 
   // ============================================================================
   // Event Lifecycle
