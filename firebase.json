@@ -1,6 +1,7 @@
 {
   "hosting": {
     "public": "docs/.vitepress/dist",
+    "site": "xulhub-sdk",
     "ignore": [
       "firebase.json",
       "**/.*",
