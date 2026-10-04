@@ -1,5 +1,5 @@
 import { QuizManager } from "./quizMananger";
-import type { AutoGenerateCellsOptions, Config } from "../types";
+import type { Config, ContentImportConfig, ContentImportOutputStructure } from "../types";
 /**
  * @internal
  * Implementation of the Notebook SDK - not intended for direct use by extensions
@@ -97,6 +97,13 @@ declare class NotebookSDK {
      */
     saveContent<T>(data: T): void;
     /**
+     * @param data
+     *this create a new cell with content with this content  type
+     
+  
+     */
+    spawnNewCell(data: ContentImportOutputStructure): void;
+    /**
      * Uploads a file to the host application.
      * Accepts File, Blob, or base64 string.
      * Ensures file size ≤ 3.5 MB (binary) and only allowed types.
@@ -144,7 +151,7 @@ declare class NotebookSDK {
     /**
      * Content generator configuration for auto-generating cells
      */
-    contentGenerator: AutoGenerateCellsOptions;
+    configImport: ContentImportConfig;
     /**
      * Shows the correct answer for quiz content
      * Must be implemented by specific cell types

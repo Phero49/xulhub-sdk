@@ -1,8 +1,9 @@
 import { QuizManager } from "./quizMananger";
 import type {
-  AutoGenerateCellsOptions,
   Config,
   connectPayload,
+  ContentImportConfig,
+  ContentImportOutputStructure,
 } from "../types";
 import { checkCell, sendMessageToClient, takeScreenShot } from "./utils/utils";
 
@@ -152,6 +153,7 @@ class NotebookSDK {
   private handleIncomingMessage(event: MessageEvent): void {
     // TODO: Add origin validation for production
     // if (event.origin !== EXPECTED_ORIGIN) return;
+    console.log(event, "eeeeeeeeeeeeeeeeeeeeeeee");
 
     const { data } = event;
     if (data == undefined || data.data == undefined) {
@@ -241,8 +243,8 @@ class NotebookSDK {
       this.sendToParent("get-meta-response", {
         autoGen: {
           icon: icon,
-          type: this.contentGenerator.contentType,
-          instruction: this.contentGenerator.instructionFormat,
+          type: this.configImport.contentType,
+          instruction: this.configImport.instructionFormat,
         },
       });
       data.published = false;
@@ -259,14 +261,14 @@ class NotebookSDK {
     if (data.cellContentData != null && data.cellContentData.processCells) {
       let rawData = data.cellContentData.dataToProcess;
       if (
-        this.contentGenerator &&
-        this.contentGenerator.contentType?.includes("html")
+        this.configImport &&
+        this.configImport.contentType?.includes("html")
       ) {
         const div = document.createElement("div");
         div.innerHTML = data.cellContentData.dataToProcess;
         rawData = div;
       }
-      const generatedContent = this.contentGenerator.processImport(rawData);
+      const generatedContent = this.configImport.processImport(rawData);
 
       // Handle auto-generation if configured
 
@@ -367,6 +369,17 @@ class NotebookSDK {
 
     this.contentData = cloned;
     this.sendToParent("saveData", cloned);
+  }
+
+  /**
+   * @param data 
+   *this create a new cell with content with this content  type 
+   
+
+   */
+
+  public spawnNewCell(data: ContentImportOutputStructure) {
+    this.sendToParent("spawnNewCell", data);
   }
 
   /**
@@ -526,7 +539,7 @@ class NotebookSDK {
   /**
    * Content generator configuration for auto-generating cells
    */
-  public contentGenerator: AutoGenerateCellsOptions = {
+  public configImport: ContentImportConfig = {
     contentType: null,
     instructionFormat: null,
     processImport: (_input) => {

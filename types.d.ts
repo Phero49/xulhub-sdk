@@ -287,12 +287,12 @@ export type Config = {
  */
 export type ProcessImport = (
   input: string | HTMLElement,
-) => ProcessImportOutPut[] | null;
+) => ContentImportOutputStructure[] | null;
 
 /**
- * Represents the output of processing an imported cell.
+ * Represents how the output of processed imports should be
  */
-export type ProcessImportOutPut = {
+export type ContentImportOutputStructure = {
   /** The type of cell, either an exercise or a note */
   cellType: "exercise" | "note";
 
@@ -304,9 +304,9 @@ export type ProcessImportOutPut = {
 };
 
 /**
- * Options for automatically generating cells.
+ * Options for importing  cell content to auto generate cells.
  */
-export type AutoGenerateCellsOptions = {
+export type ContentImportConfig = {
   /**
    * The type of content being passed for processing.
    * - `"htmlElement"`: content is an HTML element
