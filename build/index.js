@@ -1102,8 +1102,8 @@ class NotebookSDK {
       this.sendToParent("get-meta-response", {
         autoGen: {
           icon,
-          type: this.contentGenerator.contentType,
-          instruction: this.contentGenerator.instructionFormat
+          type: this.configImport.contentType,
+          instruction: this.configImport.instructionFormat
         }
       });
       data.published = false;
@@ -1116,12 +1116,12 @@ class NotebookSDK {
     this.isInitialized = true;
     if (data.cellContentData != null && data.cellContentData.processCells) {
       let rawData = data.cellContentData.dataToProcess;
-      if (this.contentGenerator && this.contentGenerator.contentType?.includes("html")) {
+      if (this.configImport && this.configImport.contentType?.includes("html")) {
         const div = document.createElement("div");
         div.innerHTML = data.cellContentData.dataToProcess;
         rawData = div;
       }
-      const generatedContent = this.contentGenerator.processImport(rawData);
+      const generatedContent = this.configImport.processImport(rawData);
       this.sendToParent("autoGenerateCells", generatedContent);
       return;
     }
@@ -1162,6 +1162,9 @@ class NotebookSDK {
     }
     this.contentData = cloned;
     this.sendToParent("saveData", cloned);
+  }
+  spawnNewCell(data) {
+    this.sendToParent("spawnNewCell", data);
   }
   async uploadFile(file, timeoutMs = 15000) {
     const allowedTypes = [
@@ -1253,7 +1256,7 @@ class NotebookSDK {
     if (this.onScreenshotCaptured)
       this.onScreenshotCaptured();
   }
-  contentGenerator = {
+  configImport = {
     contentType: null,
     instructionFormat: null,
     processImport: (_input) => {
